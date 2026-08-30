@@ -16,25 +16,26 @@ public class ClientConnection {
 
     public void handle() throws IOException {
 
-        FrameDecoder decoder =
-                new FrameDecoder();
+        FrameDecoder decoder = new FrameDecoder();
 
-        Frame frame =
-                decoder.decode(socket.getInputStream());
+        while (true) {
 
-        if (frame == null) {
+            Frame frame = decoder.decode(socket.getInputStream());
+
+            if (frame == null) {
+                System.out.println(
+                        "Client disconnected: "
+                                + socket.getRemoteSocketAddress()
+                );
+                break;
+            }
+
             System.out.println(
-                    "Client disconnected: "
-                            + socket.getRemoteSocketAddress()
+                    "Received frame [" +
+                            frame.length() +
+                            " bytes]: " +
+                            frame.payloadAsString()
             );
-            return;
         }
-
-        System.out.println(
-                "Received frame [" +
-                        frame.length() +
-                        " bytes]: " +
-                        frame.payloadAsString()
-        );
     }
 }

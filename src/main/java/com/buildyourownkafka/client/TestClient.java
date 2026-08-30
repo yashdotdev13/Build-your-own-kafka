@@ -13,20 +13,31 @@ public class TestClient {
 
             System.out.println("Connected to broker.");
 
-            Frame frame =
-                    new Frame("Hello Broker");
+            FrameEncoder encoder = new FrameEncoder();
 
-            FrameEncoder encoder =
-                    new FrameEncoder();
+            sendMessage(encoder, socket, "Hello");
+            sendMessage(encoder, socket, "Kafka");
+            sendMessage(encoder, socket, "From");
+            sendMessage(encoder, socket, "Client");
 
-            encoder.encode(
-                    frame,
-                    socket.getOutputStream()
-            );
-
-            System.out.println(
-                    "Frame sent: " + frame.payloadAsString()
-            );
+            System.out.println("All frames sent.");
         }
+    }
+
+    private static void sendMessage(
+            FrameEncoder encoder,
+            Socket socket,
+            String message) throws Exception {
+
+        Frame frame = new Frame(message);
+
+        encoder.encode(
+                frame,
+                socket.getOutputStream()
+        );
+
+        System.out.println(
+                "Sent frame: " + message
+        );
     }
 }
