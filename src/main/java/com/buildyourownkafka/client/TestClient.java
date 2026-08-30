@@ -1,8 +1,9 @@
 package com.buildyourownkafka.client;
 
-import java.io.OutputStream;
+import com.buildyourownkafka.protocol.Frame;
+import com.buildyourownkafka.protocol.FrameEncoder;
+
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 
 public class TestClient {
 
@@ -12,19 +13,19 @@ public class TestClient {
 
             System.out.println("Connected to broker.");
 
-            OutputStream outputStream =
-                    socket.getOutputStream();
+            Frame frame =
+                    new Frame("Hello Broker");
 
-            String message = "Hello Broker";
+            FrameEncoder encoder =
+                    new FrameEncoder();
 
-            outputStream.write(
-                    message.getBytes(StandardCharsets.UTF_8)
+            encoder.encode(
+                    frame,
+                    socket.getOutputStream()
             );
 
-            outputStream.flush();
-
             System.out.println(
-                    "Message sent: " + message
+                    "Frame sent: " + frame.payloadAsString()
             );
         }
     }

@@ -1,9 +1,10 @@
 package com.buildyourownkafka.broker;
 
+import com.buildyourownkafka.protocol.Frame;
+import com.buildyourownkafka.protocol.FrameDecoder;
+
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 
 public class ClientConnection {
 
@@ -15,13 +16,13 @@ public class ClientConnection {
 
     public void handle() throws IOException {
 
-        InputStream inputStream = socket.getInputStream();
+        FrameDecoder decoder =
+                new FrameDecoder();
 
-        byte[] buffer = new byte[1024];
+        Frame frame =
+                decoder.decode(socket.getInputStream());
 
-        int bytesRead = inputStream.read(buffer);
-
-        if (bytesRead == -1) {
+        if (frame == null) {
             System.out.println(
                     "Client disconnected: "
                             + socket.getRemoteSocketAddress()
@@ -29,15 +30,11 @@ public class ClientConnection {
             return;
         }
 
-        String message = new String(
-                buffer,
-                0,
-                bytesRead,
-                StandardCharsets.UTF_8
-        );
-
         System.out.println(
-                "Received from client: " + message
+                "Received frame [" +
+                        frame.length() +
+                        " bytes]: " +
+                        frame.payloadAsString()
         );
     }
 }

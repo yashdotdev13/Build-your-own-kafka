@@ -1,4 +1,7 @@
+com\buildyourownkafka\protocol\Frame.class
+com\buildyourownkafka\protocol\FrameDecoder.class
 com\buildyourownkafka\client\TestClient.class
 com\buildyourownkafka\broker\BrokerServer.class
 com\buildyourownkafka\broker\ClientConnection.class
 com\buildyourownkafka\Main.class
+com\buildyourownkafka\protocol\FrameEncoder.class
