@@ -1,0 +1,4 @@
+com\buildyourownkafka\client\TestClient.class
+com\buildyourownkafka\broker\BrokerServer.class
+com\buildyourownkafka\broker\ClientConnection.class
+com\buildyourownkafka\Main.class
