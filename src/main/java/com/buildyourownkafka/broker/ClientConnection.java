@@ -5,6 +5,8 @@ import com.buildyourownkafka.protocol.RequestDecoder;
 import com.buildyourownkafka.protocol.Response;
 import com.buildyourownkafka.protocol.ResponseEncoder;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
@@ -18,12 +20,30 @@ public class ClientConnection {
 
     public void handle() throws IOException {
 
-        RequestDecoder requestDecoder = new RequestDecoder();
-        ResponseEncoder responseEncoder = new ResponseEncoder();
-        RequestHandler requestHandler = new RequestHandler();
+        DataInputStream input =
+                new DataInputStream(
+                        socket.getInputStream()
+                );
+
+        DataOutputStream output =
+                new DataOutputStream(
+                        socket.getOutputStream()
+                );
+
+        RequestDecoder requestDecoder =
+                new RequestDecoder(input);
+
+        ResponseEncoder responseEncoder =
+                new ResponseEncoder(output);
+
+        RequestDispatcher dispatcher =
+                new RequestDispatcher();
 
         while (true) {
-            Request request = requestDecoder.decode(socket.getInputStream());
+
+            Request request =
+                    requestDecoder.decode();
+
             if (request == null) {
                 System.out.println(
                         "Client disconnected: "
@@ -39,13 +59,10 @@ public class ClientConnection {
                             request.correlationId()
             );
 
-            Response response = requestHandler.handle(request);
+            Response response =
+                    dispatcher.dispatch(request);
 
-
-            responseEncoder.encode(
-                    response,
-                    socket.getOutputStream()
-            );
+            responseEncoder.encode(response);
 
             System.out.println(
                     "Sent response: correlationId=" +

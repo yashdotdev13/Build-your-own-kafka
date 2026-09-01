@@ -3,22 +3,23 @@ package com.buildyourownkafka.protocol;
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
-import java.io.InputStream;
 
 public class FrameDecoder {
 
     private static final int MAX_FRAME_SIZE = 1024 * 1024;
 
-    public Frame decode(InputStream inputStream)
-            throws IOException {
+    private final DataInputStream input;
 
-        DataInputStream dataInputStream =
-                new DataInputStream(inputStream);
+    public FrameDecoder(DataInputStream input) {
+        this.input = input;
+    }
+
+    public Frame decode() throws IOException {
 
         int length;
 
         try {
-            length = dataInputStream.readInt();
+            length = input.readInt();
         } catch (EOFException e) {
             return null;
         }
@@ -37,7 +38,7 @@ public class FrameDecoder {
 
         byte[] payload = new byte[length];
 
-        dataInputStream.readFully(payload);
+        input.readFully(payload);
 
         return new Frame(payload);
     }

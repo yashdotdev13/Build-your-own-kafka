@@ -3,34 +3,53 @@ package com.buildyourownkafka.protocol;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 public class RequestDecoder {
 
-    private final FrameDecoder frameDecoder = new FrameDecoder();
-    public Request decode(InputStream inputStream) throws IOException {
+    private final FrameDecoder frameDecoder;
 
-        Frame frame = frameDecoder.decode(inputStream);
+    public RequestDecoder(DataInputStream input) {
+        this.frameDecoder =
+                new FrameDecoder(input);
+    }
+
+    public Request decode() throws IOException {
+
+        Frame frame =
+                frameDecoder.decode();
+
         if (frame == null) {
             return null;
         }
 
-        DataInputStream data = new DataInputStream(new ByteArrayInputStream(frame.payload()));
+        DataInputStream data =
+                new DataInputStream(
+                        new ByteArrayInputStream(
+                                frame.payload()
+                        )
+                );
 
         int type = data.readInt();
+
         short version = data.readShort();
+
         int correlationId = data.readInt();
 
         int payloadLength = data.readInt();
 
         if (payloadLength < 0 ||
-                payloadLength > frame.length()) {
+                payloadLength >
+                        frame.length()) {
 
-            throw new IOException("Invalid request payload length: "+ payloadLength
+            throw new IOException(
+                    "Invalid request payload length: "
+                            + payloadLength
             );
         }
 
-        byte[] payload = new byte[payloadLength];
+        byte[] payload =
+                new byte[payloadLength];
+
         data.readFully(payload);
 
         return new Request(

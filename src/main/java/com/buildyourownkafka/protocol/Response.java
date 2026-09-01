@@ -9,7 +9,7 @@ public record Response(
     public static final int SUCCESS = 0;
     public static final int ERROR = 1;
 
-    public Resoonse {
+    public Response {
         if(payload == null){
             throw new NullPointerException("Payload cannot be null");
         }

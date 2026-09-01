@@ -3,19 +3,20 @@ package com.buildyourownkafka.protocol;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 public class ResponseDecoder {
 
-    private final FrameDecoder frameDecoder =
-            new FrameDecoder();
+    private final FrameDecoder frameDecoder;
 
-    public Response decode(
-            InputStream inputStream
-    ) throws IOException {
+    public ResponseDecoder(DataInputStream input) {
+        this.frameDecoder =
+                new FrameDecoder(input);
+    }
+
+    public Response decode() throws IOException {
 
         Frame frame =
-                frameDecoder.decode(inputStream);
+                frameDecoder.decode();
 
         if (frame == null) {
             return null;
@@ -29,6 +30,7 @@ public class ResponseDecoder {
                 );
 
         int correlationId = data.readInt();
+
         int status = data.readInt();
 
         int payloadLength = data.readInt();

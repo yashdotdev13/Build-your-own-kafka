@@ -2,20 +2,20 @@ package com.buildyourownkafka.protocol;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 
 public class FrameEncoder {
 
-    public void encode(Frame frame, OutputStream outputStream)
-            throws IOException {
+    private final DataOutputStream output;
 
-        DataOutputStream dataOutputStream =
-                new DataOutputStream(outputStream);
+    public FrameEncoder(DataOutputStream output) {
+        this.output = output;
+    }
 
-        dataOutputStream.writeInt(frame.length());
+    public void encode(Frame frame) throws IOException {
 
-        dataOutputStream.write(frame.payload());
+        output.writeInt(frame.length());
+        output.write(frame.payload());
 
-        dataOutputStream.flush();
+        output.flush();
     }
 }
