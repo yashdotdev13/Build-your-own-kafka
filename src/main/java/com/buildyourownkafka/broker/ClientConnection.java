@@ -1,7 +1,9 @@
 package com.buildyourownkafka.broker;
 
-import com.buildyourownkafka.protocol.Frame;
-import com.buildyourownkafka.protocol.FrameDecoder;
+import com.buildyourownkafka.protocol.Request;
+import com.buildyourownkafka.protocol.RequestDecoder;
+import com.buildyourownkafka.protocol.Response;
+import com.buildyourownkafka.protocol.ResponseEncoder;
 
 import java.io.IOException;
 import java.net.Socket;
@@ -16,13 +18,13 @@ public class ClientConnection {
 
     public void handle() throws IOException {
 
-        FrameDecoder decoder = new FrameDecoder();
+        RequestDecoder requestDecoder = new RequestDecoder();
+        ResponseEncoder responseEncoder = new ResponseEncoder();
+        RequestHandler requestHandler = new RequestHandler();
 
         while (true) {
-
-            Frame frame = decoder.decode(socket.getInputStream());
-
-            if (frame == null) {
+            Request request = requestDecoder.decode(socket.getInputStream());
+            if (request == null) {
                 System.out.println(
                         "Client disconnected: "
                                 + socket.getRemoteSocketAddress()
@@ -31,10 +33,23 @@ public class ClientConnection {
             }
 
             System.out.println(
-                    "Received frame [" +
-                            frame.length() +
-                            " bytes]: " +
-                            frame.payloadAsString()
+                    "Received request: type=" +
+                            request.type() +
+                            ", correlationId=" +
+                            request.correlationId()
+            );
+
+            Response response = requestHandler.handle(request);
+
+
+            responseEncoder.encode(
+                    response,
+                    socket.getOutputStream()
+            );
+
+            System.out.println(
+                    "Sent response: correlationId=" +
+                            response.correlationId()
             );
         }
     }
