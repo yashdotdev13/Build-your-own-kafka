@@ -3,21 +3,30 @@ package com.buildyourownkafka.broker;
 import com.buildyourownkafka.protocol.Request;
 import com.buildyourownkafka.protocol.Response;
 
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
-import java.nio.charset.StandardCharsets;
 
 public class RequestDispatcher {
 
     private final Map<Integer, RequestHandler> handlers;
 
-    public RequestDispatcher() {
+    public RequestDispatcher(
+            TopicManager topicManager
+    ) {
 
         this.handlers = new HashMap<>();
 
         register(
                 Request.PING,
                 new PingRequestHandler()
+        );
+
+        register(
+                Request.CREATE_TOPIC,
+                new CreateTopicRequestHandler(
+                        topicManager
+                )
         );
     }
 
@@ -41,7 +50,9 @@ public class RequestDispatcher {
                     (
                             "Unknown request type: "
                                     + request.type()
-                    ).getBytes(StandardCharsets.UTF_8)
+                    ).getBytes(
+                            StandardCharsets.UTF_8
+                    )
             );
         }
 

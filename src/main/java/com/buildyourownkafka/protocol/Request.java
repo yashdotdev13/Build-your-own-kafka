@@ -8,6 +8,7 @@ public record Request (
 ){
 
     public static final int PING = 1;
+    public static final int CREATE_TOPIC = 2;
 
     public Request{
         if(payload == null){

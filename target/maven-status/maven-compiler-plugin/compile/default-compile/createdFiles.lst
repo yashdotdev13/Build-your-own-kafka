@@ -1,4 +1,5 @@
 com\buildyourownkafka\protocol\Frame.class
+com\buildyourownkafka\broker\CreateTopicRequestHandler.class
 com\buildyourownkafka\broker\RequestHandler.class
 com\buildyourownkafka\protocol\RequestEncoder.class
 com\buildyourownkafka\protocol\RequestDecoder.class

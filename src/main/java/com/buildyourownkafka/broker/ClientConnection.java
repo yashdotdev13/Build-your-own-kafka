@@ -14,8 +14,14 @@ public class ClientConnection {
 
     private final Socket socket;
 
-    public ClientConnection(Socket socket) {
+    private final TopicManager topicManager;
+
+    public ClientConnection(
+            Socket socket,
+            TopicManager topicManager
+    ) {
         this.socket = socket;
+        this.topicManager = topicManager;
     }
 
     public void handle() throws IOException {
@@ -37,7 +43,9 @@ public class ClientConnection {
                 new ResponseEncoder(output);
 
         RequestDispatcher dispatcher =
-                new RequestDispatcher();
+                new RequestDispatcher(
+                        topicManager
+                );
 
         while (true) {
 
