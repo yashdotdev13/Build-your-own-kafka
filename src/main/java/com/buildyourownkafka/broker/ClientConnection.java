@@ -13,7 +13,6 @@ import java.net.Socket;
 public class ClientConnection {
 
     private final Socket socket;
-
     private final TopicManager topicManager;
 
     public ClientConnection(
@@ -43,9 +42,7 @@ public class ClientConnection {
                 new ResponseEncoder(output);
 
         RequestDispatcher dispatcher =
-                new RequestDispatcher(
-                        topicManager
-                );
+                new RequestDispatcher(topicManager);
 
         while (true) {
 
@@ -53,29 +50,25 @@ public class ClientConnection {
                     requestDecoder.decode();
 
             if (request == null) {
-                System.out.println(
-                        "Client disconnected: "
-                                + socket.getRemoteSocketAddress()
-                );
                 break;
             }
 
             System.out.println(
-                    "Received request: type=" +
-                            request.type() +
-                            ", correlationId=" +
-                            request.correlationId()
+                    "Received request: type="
+                            + request.type()
+                            + ", correlationId="
+                            + request.correlationId()
             );
 
             Response response =
                     dispatcher.dispatch(request);
 
             responseEncoder.encode(response);
-
-            System.out.println(
-                    "Sent response: correlationId=" +
-                            response.correlationId()
-            );
         }
+
+        System.out.println(
+                "Client disconnected: "
+                        + socket.getRemoteSocketAddress()
+        );
     }
 }

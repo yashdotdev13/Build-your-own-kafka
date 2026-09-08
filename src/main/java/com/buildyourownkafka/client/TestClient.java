@@ -12,8 +12,7 @@ import java.nio.charset.StandardCharsets;
 
 public class TestClient {
 
-    public static void main(String[] args)
-            throws Exception {
+    public static void main(String[] args) throws Exception {
 
         try (Socket socket =
                      new Socket("localhost", 9092)) {
@@ -38,7 +37,11 @@ public class TestClient {
             ResponseDecoder responseDecoder =
                     new ResponseDecoder(input);
 
-            Request request =
+            // -------------------------
+            // 1. PING
+            // -------------------------
+
+            Request pingRequest =
                     new Request(
                             Request.PING,
                             (short) 1,
@@ -46,40 +49,66 @@ public class TestClient {
                             new byte[0]
                     );
 
-            requestEncoder.encode(request);
+            requestEncoder.encode(pingRequest);
 
-            System.out.println(
-                    "Sent request: PING"
-            );
-
-            Response response =
+            Response pingResponse =
                     responseDecoder.decode();
 
-            if (response == null) {
-                System.out.println(
-                        "Broker closed the connection."
-                );
-                return;
-            }
-
-            System.out.println(
-                    "Received response:"
-            );
-
+            System.out.println();
+            System.out.println("PING RESPONSE");
             System.out.println(
                     "Correlation ID: "
-                            + response.correlationId()
+                            + pingResponse.correlationId()
             );
-
             System.out.println(
                     "Status: "
-                            + response.status()
+                            + pingResponse.status()
             );
-
             System.out.println(
                     "Payload: "
                             + new String(
-                            response.payload(),
+                            pingResponse.payload(),
+                            StandardCharsets.UTF_8
+                    )
+            );
+
+            // -------------------------
+            // 2. CREATE TOPIC
+            // -------------------------
+
+            String topicName = "orders";
+
+            Request createTopicRequest =
+                    new Request(
+                            Request.CREATE_TOPIC,
+                            (short) 1,
+                            100,
+                            topicName.getBytes(
+                                    StandardCharsets.UTF_8
+                            )
+                    );
+
+            requestEncoder.encode(
+                    createTopicRequest
+            );
+
+            Response createTopicResponse =
+                    responseDecoder.decode();
+
+            System.out.println();
+            System.out.println("CREATE_TOPIC RESPONSE");
+            System.out.println(
+                    "Correlation ID: "
+                            + createTopicResponse.correlationId()
+            );
+            System.out.println(
+                    "Status: "
+                            + createTopicResponse.status()
+            );
+            System.out.println(
+                    "Payload: "
+                            + new String(
+                            createTopicResponse.payload(),
                             StandardCharsets.UTF_8
                     )
             );
