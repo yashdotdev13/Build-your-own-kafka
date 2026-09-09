@@ -8,44 +8,21 @@ import java.util.Map;
 
 public class RequestDispatcher {
 
-    private final Map<Integer, RequestHandler> handlers =
-            new HashMap<>();
+    private final Map<Integer, RequestHandler> handlers = new HashMap<>();
 
     public RequestDispatcher(TopicManager topicManager) {
-
-        register(
-                Request.PING,
-                new PingRequestHandler()
-        );
-
-        register(
-                Request.CREATE_TOPIC,
-                new CreateTopicRequestHandler(topicManager)
-        );
+        register(Request.PING, new PingRequestHandler());
+        register(Request.CREATE_TOPIC, new CreateTopicRequestHandler(topicManager));
     }
-
-    private void register(
-            int requestType,
-            RequestHandler handler
-    ) {
+    private void register(int requestType, RequestHandler handler) {
         handlers.put(requestType, handler);
     }
-
     public Response dispatch(Request request) {
-
-        RequestHandler handler =
-                handlers.get(request.type());
+        RequestHandler handler = handlers.get(request.type());
 
         if (handler == null) {
-
-            return new Response(
-                    request.correlationId(),
-                    Response.ERROR,
-                    ("Unknown request type: " + request.type())
-                            .getBytes()
-            );
+            return new Response(request.correlationId(), Response.ERROR, ("Unknown request type: " + request.type()).getBytes());
         }
-
         return handler.handle(request);
     }
 }

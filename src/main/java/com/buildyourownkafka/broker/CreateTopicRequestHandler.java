@@ -10,9 +10,7 @@ public class CreateTopicRequestHandler implements RequestHandler {
 
     private final TopicManager topicManager;
 
-    public CreateTopicRequestHandler(
-            TopicManager topicManager
-    ) {
+    public CreateTopicRequestHandler(TopicManager topicManager) {
         this.topicManager = topicManager;
     }
 
@@ -20,55 +18,15 @@ public class CreateTopicRequestHandler implements RequestHandler {
     public Response handle(Request request) {
 
         try {
+            CreateTopicPayload payload = CreateTopicPayload.decode(request.payload());
+            System.out.println("Decoded CREATE_TOPIC: " + payload.topicName() + ", partitions=" + payload.partitionCount());
+            Topic topic = topicManager.createTopic(payload.topicName(), payload.partitionCount());
+            System.out.println("Topic created: " + topic.name() + " with " + topic.partitionCount() + " partition(s)");
 
-            CreateTopicPayload payload =
-                    CreateTopicPayload.decode(
-                            request.payload()
-                    );
-
-            System.out.println(
-                    "Decoded CREATE_TOPIC: "
-                            + payload.topicName()
-                            + ", partitions="
-                            + payload.partitionCount()
-            );
-
-            Topic topic =
-                    topicManager.createTopic(
-                            payload.topicName(),
-                            payload.partitionCount()
-                    );
-
-            System.out.println(
-                    "Topic created: "
-                            + topic.name()
-                            + " with "
-                            + topic.partitionCount()
-                            + " partition(s)"
-            );
-
-            return new Response(
-                    request.correlationId(),
-                    Response.SUCCESS,
-                    topic.name().getBytes(
-                            StandardCharsets.UTF_8
-                    )
-            );
-
+            return new Response(request.correlationId(), Response.SUCCESS, topic.name().getBytes(StandardCharsets.UTF_8));
         } catch (IllegalArgumentException e) {
-
-            System.err.println(
-                    "Failed to create topic: "
-                            + e.getMessage()
-            );
-
-            return new Response(
-                    request.correlationId(),
-                    Response.ERROR,
-                    e.getMessage().getBytes(
-                            StandardCharsets.UTF_8
-                    )
-            );
+            System.err.println("Failed to create topic: " + e.getMessage());
+            return new Response(request.correlationId(), Response.ERROR, e.getMessage().getBytes(StandardCharsets.UTF_8));
         }
     }
 }

@@ -15,60 +15,27 @@ public class ClientConnection {
     private final Socket socket;
     private final TopicManager topicManager;
 
-    public ClientConnection(
-            Socket socket,
-            TopicManager topicManager
-    ) {
+    public ClientConnection(Socket socket, TopicManager topicManager) {
         this.socket = socket;
         this.topicManager = topicManager;
     }
 
     public void handle() throws IOException {
-
-        DataInputStream input =
-                new DataInputStream(
-                        socket.getInputStream()
-                );
-
-        DataOutputStream output =
-                new DataOutputStream(
-                        socket.getOutputStream()
-                );
-
-        RequestDecoder requestDecoder =
-                new RequestDecoder(input);
-
-        ResponseEncoder responseEncoder =
-                new ResponseEncoder(output);
-
-        RequestDispatcher dispatcher =
-                new RequestDispatcher(topicManager);
+        DataInputStream input = new DataInputStream(socket.getInputStream());
+        DataOutputStream output = new DataOutputStream(socket.getOutputStream());
+        RequestDecoder requestDecoder = new RequestDecoder(input);
+        ResponseEncoder responseEncoder = new ResponseEncoder(output);
+        RequestDispatcher dispatcher = new RequestDispatcher(topicManager);
 
         while (true) {
-
-            Request request =
-                    requestDecoder.decode();
-
+            Request request = requestDecoder.decode();
             if (request == null) {
                 break;
             }
-
-            System.out.println(
-                    "Received request: type="
-                            + request.type()
-                            + ", correlationId="
-                            + request.correlationId()
-            );
-
-            Response response =
-                    dispatcher.dispatch(request);
-
+            System.out.println("Received request: type=" + request.type() + ", correlationId=" + request.correlationId());
+            Response response = dispatcher.dispatch(request);
             responseEncoder.encode(response);
         }
-
-        System.out.println(
-                "Client disconnected: "
-                        + socket.getRemoteSocketAddress()
-        );
+        System.out.println("Client disconnected: " + socket.getRemoteSocketAddress());
     }
 }

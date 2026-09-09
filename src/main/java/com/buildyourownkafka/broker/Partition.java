@@ -6,14 +6,10 @@ public class Partition {
 
     public Partition(int id) {
         if (id < 0) {
-            throw new IllegalArgumentException(
-                    "Partition id cannot be negative"
-            );
+            throw new IllegalArgumentException("Partition id cannot be negative");
         }
-
         this.id = id;
     }
-
     public int id() {
         return id;
     }

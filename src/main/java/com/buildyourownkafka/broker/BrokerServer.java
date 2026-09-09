@@ -24,7 +24,6 @@ public class BrokerServer {
     }
 
     public void start() throws IOException {
-
         serverSocket = new ServerSocket(port);
         running = true;
 
@@ -42,14 +41,8 @@ public class BrokerServer {
         while (running) {
 
             try {
-
-                Socket clientSocket =
-                        serverSocket.accept();
-
-                System.out.println(
-                        "Client connected: " +
-                                clientSocket.getRemoteSocketAddress()
-                );
+                Socket clientSocket = serverSocket.accept();
+                System.out.println("Client connected: " + clientSocket.getRemoteSocketAddress());
 
                 /*
                  * Each client gets its own virtual thread.
@@ -57,70 +50,39 @@ public class BrokerServer {
                  * However, every ClientConnection receives
                  * the SAME TopicManager instance.
                  */
-                Thread.startVirtualThread(
-                        () -> handleClient(clientSocket)
-                );
+                Thread.startVirtualThread(() -> handleClient(clientSocket));
 
             } catch (IOException e) {
-
                 if (running) {
-
-                    System.err.println(
-                            "Error accepting client connection: "
-                                    + e.getMessage()
-                    );
+                    System.err.println("Error accepting client connection: " + e.getMessage());
                 }
             }
         }
     }
 
-    private void handleClient(
-            Socket clientSocket
-    ) {
-
+    private void handleClient(Socket clientSocket) {
         try (clientSocket) {
 
             /*
              * Pass the shared TopicManager to the
              * ClientConnection.
              */
-            ClientConnection connection =
-                    new ClientConnection(
-                            clientSocket,
-                            topicManager
-                    );
-
+            ClientConnection connection = new ClientConnection(clientSocket, topicManager);
             connection.handle();
-
         } catch (IOException e) {
-
-            System.err.println(
-                    "Client connection error: "
-                            + e.getMessage()
-            );
+            System.err.println("Client connection error: " + e.getMessage());
         }
     }
 
     public void stop() {
-
         running = false;
-
-        if (serverSocket != null &&
-                !serverSocket.isClosed()) {
-
+        if (serverSocket != null && !serverSocket.isClosed()) {
             try {
-
                 serverSocket.close();
-
             } catch (IOException e) {
-
-                System.err.println(
-                        "Error while stopping broker: "
-                                + e.getMessage()
-                );
+                System.err.println("Error while stopping broker: " + e.getMessage());
             }
         }
-
         System.out.println("Broker stopped.");
     }
 }

@@ -9,11 +9,6 @@ public class PingRequestHandler implements RequestHandler {
 
     @Override
     public Response handle(Request request) {
-
-        return new Response(
-                request.correlationId(),
-                Response.SUCCESS,
-                "PONG".getBytes(StandardCharsets.UTF_8)
-        );
+        return new Response(request.correlationId(), Response.SUCCESS, "PONG".getBytes(StandardCharsets.UTF_8));
     }
 }

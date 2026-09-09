@@ -6,37 +6,24 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class TopicManager {
 
-    private final Map<String, Topic> topics =
-            new ConcurrentHashMap<>();
+    private final Map<String, Topic> topics = new ConcurrentHashMap<>();
 
-    public Topic createTopic(
-            String name,
-            int partitionCount
-    ) {
-
-        Topic topic =
-                new Topic(name, partitionCount);
-
-        Topic existing =
-                topics.putIfAbsent(name, topic);
+    public Topic createTopic(String name, int partitionCount) {
+        Topic topic = new Topic(name, partitionCount);
+        Topic existing = topics.putIfAbsent(name, topic);
 
         if (existing != null) {
-            throw new IllegalArgumentException(
-                    "Topic already exists: " + name
-            );
+            throw new IllegalArgumentException("Topic already exists: " + name);
         }
-
         return topic;
     }
 
     public Topic getTopic(String name) {
         return topics.get(name);
     }
-
     public boolean topicExists(String name) {
         return topics.containsKey(name);
     }
-
     public Collection<Topic> getAllTopics() {
         return topics.values();
     }

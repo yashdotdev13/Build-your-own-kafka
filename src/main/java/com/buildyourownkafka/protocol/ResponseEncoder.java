@@ -12,22 +12,18 @@ public class ResponseEncoder {
         this.frameEncoder = new FrameEncoder(output);
     }
 
-    public void encode(Response response)
-            throws IOException {
+    public void encode(Response response) throws IOException {
 
-        ByteArrayOutputStream buffer =
-                new ByteArrayOutputStream();
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
-        DataOutputStream data =
-                new DataOutputStream(buffer);
+        DataOutputStream data = new DataOutputStream(buffer);
 
         data.writeInt(response.correlationId());
         data.writeInt(response.status());
         data.writeInt(response.payload().length);
         data.write(response.payload());
 
-        Frame frame =
-                new Frame(buffer.toByteArray());
+        Frame frame = new Frame(buffer.toByteArray());
 
         frameEncoder.encode(frame);
     }
