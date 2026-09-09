@@ -8,9 +8,11 @@ com\buildyourownkafka\broker\BrokerServer.class
 com\buildyourownkafka\broker\ClientConnection.class
 com\buildyourownkafka\broker\Topic.class
 com\buildyourownkafka\protocol\Response.class
+com\buildyourownkafka\broker\Partition.class
 com\buildyourownkafka\client\TopicTest.class
 com\buildyourownkafka\protocol\Request.class
 com\buildyourownkafka\protocol\ResponseDecoder.class
+com\buildyourownkafka\protocol\CreateTopicPayload.class
 com\buildyourownkafka\broker\RequestDispatcher.class
 com\buildyourownkafka\protocol\FrameDecoder.class
 com\buildyourownkafka\broker\TopicManager.class

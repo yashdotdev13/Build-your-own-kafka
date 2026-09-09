@@ -9,8 +9,13 @@ public class TopicManager {
     private final Map<String, Topic> topics =
             new ConcurrentHashMap<>();
 
-    public Topic createTopic(String name) {
-        Topic topic = new Topic(name);
+    public Topic createTopic(
+            String name,
+            int partitionCount
+    ) {
+
+        Topic topic =
+                new Topic(name, partitionCount);
 
         Topic existing =
                 topics.putIfAbsent(name, topic);

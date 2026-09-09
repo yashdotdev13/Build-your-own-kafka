@@ -1,5 +1,6 @@
 package com.buildyourownkafka.client;
 
+import com.buildyourownkafka.protocol.CreateTopicPayload;
 import com.buildyourownkafka.protocol.Request;
 import com.buildyourownkafka.protocol.RequestEncoder;
 import com.buildyourownkafka.protocol.Response;
@@ -37,9 +38,9 @@ public class TestClient {
             ResponseDecoder responseDecoder =
                     new ResponseDecoder(input);
 
-            // -------------------------
-            // 1. PING
-            // -------------------------
+            // ========================================
+            // PING
+            // ========================================
 
             Request pingRequest =
                     new Request(
@@ -56,14 +57,17 @@ public class TestClient {
 
             System.out.println();
             System.out.println("PING RESPONSE");
+
             System.out.println(
                     "Correlation ID: "
                             + pingResponse.correlationId()
             );
+
             System.out.println(
                     "Status: "
                             + pingResponse.status()
             );
+
             System.out.println(
                     "Payload: "
                             + new String(
@@ -72,20 +76,30 @@ public class TestClient {
                     )
             );
 
-            // -------------------------
-            // 2. CREATE TOPIC
-            // -------------------------
+            // ========================================
+            // CREATE_TOPIC
+            // ========================================
 
-            String topicName = "orders";
+            CreateTopicPayload createTopicPayload =
+                    new CreateTopicPayload(
+                            "orders",
+                            3
+                    );
+
+            System.out.println();
+            System.out.println(
+                    "Sending CREATE_TOPIC: "
+                            + createTopicPayload.topicName()
+                            + ", partitions="
+                            + createTopicPayload.partitionCount()
+            );
 
             Request createTopicRequest =
                     new Request(
                             Request.CREATE_TOPIC,
                             (short) 1,
                             100,
-                            topicName.getBytes(
-                                    StandardCharsets.UTF_8
-                            )
+                            createTopicPayload.encode()
                     );
 
             requestEncoder.encode(
@@ -96,15 +110,20 @@ public class TestClient {
                     responseDecoder.decode();
 
             System.out.println();
-            System.out.println("CREATE_TOPIC RESPONSE");
+            System.out.println(
+                    "CREATE_TOPIC RESPONSE"
+            );
+
             System.out.println(
                     "Correlation ID: "
                             + createTopicResponse.correlationId()
             );
+
             System.out.println(
                     "Status: "
                             + createTopicResponse.status()
             );
+
             System.out.println(
                     "Payload: "
                             + new String(
