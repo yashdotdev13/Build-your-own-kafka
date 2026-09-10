@@ -3,10 +3,12 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Clie
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\CreateTopicRequestHandler.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Partition.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\PingRequestHandler.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Record.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\RequestDispatcher.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\RequestHandler.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Topic.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\TopicManager.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\PartitionTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\TestClient.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\TopicTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\Main.java
