@@ -6,6 +6,7 @@ com\buildyourownkafka\protocol\RequestEncoder.class
 com\buildyourownkafka\broker\ProduceRequestHandler.class
 com\buildyourownkafka\broker\BrokerServer.class
 com\buildyourownkafka\broker\Topic.class
+com\buildyourownkafka\client\FetchTest.class
 com\buildyourownkafka\client\ProducePayloadTest.class
 com\buildyourownkafka\client\PartitionTest.class
 com\buildyourownkafka\client\FetchPayloadTest.class
@@ -20,6 +21,7 @@ com\buildyourownkafka\protocol\FrameEncoder.class
 com\buildyourownkafka\client\ProduceTest.class
 com\buildyourownkafka\protocol\ProducePayload.class
 com\buildyourownkafka\protocol\RequestDecoder.class
+com\buildyourownkafka\broker\FetchRequestHandler.class
 com\buildyourownkafka\broker\PingRequestHandler.class
 com\buildyourownkafka\broker\ClientConnection.class
 com\buildyourownkafka\protocol\Response.class

@@ -15,6 +15,10 @@ public class RequestDispatcher {
         register(Request.PING, new PingRequestHandler());
         register(Request.CREATE_TOPIC, new CreateTopicRequestHandler(topicManager));
         register(Request.PRODUCE, new ProduceRequestHandler(topicManager));
+        register(
+                Request.FETCH,
+                new FetchRequestHandler(topicManager)
+        );
     }
 
     private void register(int requestType, RequestHandler handler) {
