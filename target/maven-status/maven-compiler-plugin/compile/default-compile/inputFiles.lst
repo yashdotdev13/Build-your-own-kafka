@@ -9,6 +9,8 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Requ
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\RequestHandler.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Topic.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\TopicManager.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\FetchPayloadTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\FetchResponsePayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\PartitionTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ProducePayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ProduceResponsePayloadTest.java
@@ -17,6 +19,8 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\Test
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\TopicTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\Main.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\protocol\CreateTopicPayload.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\protocol\FetchPayload.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\protocol\FetchResponsePayload.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\protocol\Frame.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\protocol\FrameDecoder.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\protocol\FrameEncoder.java
