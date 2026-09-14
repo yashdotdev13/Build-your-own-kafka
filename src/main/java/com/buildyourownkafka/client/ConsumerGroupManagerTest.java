@@ -3,6 +3,9 @@ package com.buildyourownkafka.client;
 import com.buildyourownkafka.broker.ConsumerGroup;
 import com.buildyourownkafka.broker.ConsumerGroupManager;
 
+import com.buildyourownkafka.broker.PartitionAssignment;
+import java.util.List;
+
 public class ConsumerGroupManagerTest {
 
     public static void main(String[] args) {
@@ -13,6 +16,35 @@ public class ConsumerGroupManagerTest {
         ConsumerGroup paymentGroup = manager.getOrCreateGroup("payment-service");
         paymentGroup.addMember("consumer-1");
         paymentGroup.addMember("consumer-2");
+
+        PartitionAssignment assignment =
+                manager.assignPartitions(
+                        "payment-service",
+                        4
+                );
+
+        System.out.println(
+                "Payment assignment: "
+                        + assignment.assignments()
+        );
+
+        if (!assignment
+                .partitionsFor("consumer-1")
+                .equals(List.of(0, 2))) {
+
+            throw new RuntimeException(
+                    "Incorrect assignment for consumer-1"
+            );
+        }
+
+        if (!assignment
+                .partitionsFor("consumer-2")
+                .equals(List.of(1, 3))) {
+
+            throw new RuntimeException(
+                    "Incorrect assignment for consumer-2"
+            );
+        }
         ConsumerGroup analyticsGroup = manager.getOrCreateGroup("analytics-service");
 
         analyticsGroup.addMember("consumer-3");
