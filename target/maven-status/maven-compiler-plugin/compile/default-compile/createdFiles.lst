@@ -41,6 +41,7 @@ com\buildyourownkafka\client\ConsumerCommitTest.class
 com\buildyourownkafka\client\ConsumerOffsetStoreTest.class
 com\buildyourownkafka\broker\Topic.class
 com\buildyourownkafka\client\ProducePayloadTest.class
+com\buildyourownkafka\client\PartitionAssignmentTest.class
 com\buildyourownkafka\client\ConsumerTest.class
 com\buildyourownkafka\client\OffsetHandlerTest.class
 com\buildyourownkafka\client\FetchPayloadTest.class
@@ -54,6 +55,7 @@ com\buildyourownkafka\broker\PartitionLog.class
 com\buildyourownkafka\broker\LogSegment.class
 com\buildyourownkafka\protocol\RequestDecoder.class
 com\buildyourownkafka\broker\PingRequestHandler.class
+com\buildyourownkafka\broker\PartitionAssignment.class
 com\buildyourownkafka\broker\Partition.class
 com\buildyourownkafka\client\RecoveryFetchTest.class
 com\buildyourownkafka\protocol\ProduceResponsePayload.class
