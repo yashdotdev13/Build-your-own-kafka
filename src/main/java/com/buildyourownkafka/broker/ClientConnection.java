@@ -14,10 +14,14 @@ public class ClientConnection {
 
     private final Socket socket;
     private final TopicManager topicManager;
+    private final ConsumerOffsetStore consumerOffsetStore;
 
-    public ClientConnection(Socket socket, TopicManager topicManager) {
+    public ClientConnection(Socket socket, TopicManager topicManager,
+                            ConsumerOffsetStore consumerOffsetStore) {
+
         this.socket = socket;
         this.topicManager = topicManager;
+        this.consumerOffsetStore = consumerOffsetStore;
     }
 
     public void handle() throws IOException {
@@ -25,7 +29,7 @@ public class ClientConnection {
         DataOutputStream output = new DataOutputStream(socket.getOutputStream());
         RequestDecoder requestDecoder = new RequestDecoder(input);
         ResponseEncoder responseEncoder = new ResponseEncoder(output);
-        RequestDispatcher dispatcher = new RequestDispatcher(topicManager);
+        RequestDispatcher dispatcher = new RequestDispatcher(topicManager, consumerOffsetStore);
 
         while (true) {
             Request request = requestDecoder.decode();
