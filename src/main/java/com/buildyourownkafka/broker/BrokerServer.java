@@ -2,32 +2,25 @@ package com.buildyourownkafka.broker;
 
 import java.io.IOException;
 import java.net.ServerSocket;
-import java.nio.file.Path;
 import java.net.Socket;
+import java.nio.file.Path;
 
 public class BrokerServer {
 
     private final int port;
     private ServerSocket serverSocket;
     private volatile boolean running;
-
-    /*
-     * Single TopicManager owned by the broker.
-     *
-     * All client connections use this same instance.
-     * This means all clients see the same topics.
-     */
     private final TopicManager topicManager;
+    private final ConsumerOffsetStore consumerOffsetStore;
 
     public BrokerServer(int port) {
         this.port = port;
         this.topicManager = new TopicManager(Path.of("data", "topics"));
+        this.consumerOffsetStore = new ConsumerOffsetStore(Path.of("data", "offsets"));
     }
-
     public void start() throws IOException {
         serverSocket = new ServerSocket(port);
         running = true;
-
         System.out.println("========================================");
         System.out.println("        Build Your Own Kafka");
         System.out.println("========================================");
@@ -35,24 +28,13 @@ public class BrokerServer {
         System.out.println("Broker starting...");
         System.out.println("Port: " + port);
         System.out.println();
-
         System.out.println("Broker started successfully.");
         System.out.println("Waiting for connections...");
-
         while (running) {
-
             try {
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("Client connected: " + clientSocket.getRemoteSocketAddress());
-
-                /*
-                 * Each client gets its own virtual thread.
-                 *
-                 * However, every ClientConnection receives
-                 * the SAME TopicManager instance.
-                 */
                 Thread.startVirtualThread(() -> handleClient(clientSocket));
-
             } catch (IOException e) {
                 if (running) {
                     System.err.println("Error accepting client connection: " + e.getMessage());
@@ -60,15 +42,9 @@ public class BrokerServer {
             }
         }
     }
-
     private void handleClient(Socket clientSocket) {
         try (clientSocket) {
-
-            /*
-             * Pass the shared TopicManager to the
-             * ClientConnection.
-             */
-            ClientConnection connection = new ClientConnection(clientSocket, topicManager);
+            ClientConnection connection = new ClientConnection(clientSocket, topicManager, consumerOffsetStore);
             connection.handle();
         } catch (IOException e) {
             System.err.println("Client connection error: " + e.getMessage());
