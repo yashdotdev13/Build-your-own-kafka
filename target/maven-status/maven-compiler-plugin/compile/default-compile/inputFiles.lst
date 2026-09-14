@@ -12,6 +12,8 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Requ
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\RequestHandler.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Topic.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\TopicManager.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\Consumer.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\FetchPayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\FetchResponsePayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\FetchTest.java
