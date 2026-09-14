@@ -6,6 +6,7 @@ com\buildyourownkafka\protocol\CommitOffsetPayload.class
 com\buildyourownkafka\client\PartitionLogRecoveryTest.class
 com\buildyourownkafka\broker\BrokerServer.class
 com\buildyourownkafka\client\FetchTest.class
+com\buildyourownkafka\client\ConsumerGroupTest.class
 com\buildyourownkafka\broker\CommitOffsetRequestHandler.class
 com\buildyourownkafka\client\PartitionTest.class
 com\buildyourownkafka\broker\Record.class
@@ -31,6 +32,7 @@ com\buildyourownkafka\client\ProduceResponsePayloadTest.class
 com\buildyourownkafka\client\SegmentRotationTest.class
 com\buildyourownkafka\broker\RequestHandler.class
 com\buildyourownkafka\protocol\FetchPayload.class
+com\buildyourownkafka\broker\ConsumerGroup.class
 com\buildyourownkafka\broker\ProduceRequestHandler.class
 com\buildyourownkafka\protocol\FetchOffsetResponsePayload.class
 com\buildyourownkafka\client\ConsumerCommitTest.class
