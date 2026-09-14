@@ -20,6 +20,8 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\Part
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ProducePayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ProduceResponsePayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ProduceTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\RecoveryFetchTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\RecoveryProduceTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\TestClient.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\TopicTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\Main.java
