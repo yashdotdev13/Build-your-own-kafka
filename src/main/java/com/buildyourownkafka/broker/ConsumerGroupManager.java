@@ -222,22 +222,11 @@ public class ConsumerGroupManager {
                 groups.values()
         );
     }
-
-    /*
-     * ---------------------------------------------------------
-     * GROUP COUNT
-     * ---------------------------------------------------------
-     */
     public int groupCount() {
 
         return groups.size();
     }
 
-    /*
-     * ---------------------------------------------------------
-     * VALIDATION
-     * ---------------------------------------------------------
-     */
     private void validateGroupId(
             String groupId
     ) {

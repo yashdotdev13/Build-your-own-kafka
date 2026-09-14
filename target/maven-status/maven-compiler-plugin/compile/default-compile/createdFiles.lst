@@ -5,6 +5,7 @@ com\buildyourownkafka\broker\PartitionAssigner.class
 com\buildyourownkafka\protocol\RequestEncoder.class
 com\buildyourownkafka\protocol\CommitOffsetPayload.class
 com\buildyourownkafka\client\PartitionLogRecoveryTest.class
+com\buildyourownkafka\broker\ConsumerGroupCoordinator.class
 com\buildyourownkafka\broker\BrokerServer.class
 com\buildyourownkafka\client\FetchTest.class
 com\buildyourownkafka\client\ConsumerGroupTest.class
@@ -61,6 +62,7 @@ com\buildyourownkafka\broker\PartitionAssignment.class
 com\buildyourownkafka\broker\Partition.class
 com\buildyourownkafka\client\RecoveryFetchTest.class
 com\buildyourownkafka\protocol\ProduceResponsePayload.class
+com\buildyourownkafka\client\ConsumerGroupCoordinatorTest.class
 com\buildyourownkafka\client\TopicTest.class
 com\buildyourownkafka\broker\ConsumerOffsetStore$OffsetKey.class
 com\buildyourownkafka\client\PartitionLogTest.class

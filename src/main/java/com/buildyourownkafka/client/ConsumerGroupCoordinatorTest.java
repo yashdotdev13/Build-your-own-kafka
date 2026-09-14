@@ -1,0 +1,187 @@
+package com.buildyourownkafka.client;
+
+import com.buildyourownkafka.broker.ConsumerGroupCoordinator;
+import com.buildyourownkafka.broker.ConsumerGroupManager;
+import com.buildyourownkafka.broker.PartitionAssignment;
+
+import java.util.List;
+
+public class ConsumerGroupCoordinatorTest {
+
+    public static void main(String[] args) {
+
+        System.out.println(
+                "=== CONSUMER GROUP COORDINATOR TEST ==="
+        );
+
+        ConsumerGroupManager groupManager =
+                new ConsumerGroupManager();
+
+        ConsumerGroupCoordinator coordinator =
+                new ConsumerGroupCoordinator(
+                        groupManager
+                );
+
+        /*
+         * Consumer A joins.
+         */
+
+        PartitionAssignment assignment =
+                coordinator.joinGroup(
+                        "orders-group",
+                        "consumer-A",
+                        4
+                );
+
+        System.out.println(
+                "After consumer-A joins: "
+                        + assignment.assignments()
+        );
+
+        if (!assignment
+                .partitionsFor("consumer-A")
+                .equals(List.of(0, 1, 2, 3))) {
+
+            throw new RuntimeException(
+                    "Consumer-A should own all partitions"
+            );
+        }
+
+        /*
+         * Consumer B joins.
+         *
+         * This should trigger a rebalance.
+         */
+
+        assignment =
+                coordinator.joinGroup(
+                        "orders-group",
+                        "consumer-B",
+                        4
+                );
+
+        System.out.println(
+                "After consumer-B joins: "
+                        + assignment.assignments()
+        );
+
+        if (!assignment
+                .partitionsFor("consumer-A")
+                .equals(List.of(0, 2))) {
+
+            throw new RuntimeException(
+                    "Incorrect assignment for consumer-A"
+            );
+        }
+
+        if (!assignment
+                .partitionsFor("consumer-B")
+                .equals(List.of(1, 3))) {
+
+            throw new RuntimeException(
+                    "Incorrect assignment for consumer-B"
+            );
+        }
+
+        /*
+         * Verify coordinator stores
+         * the latest assignment.
+         */
+
+        PartitionAssignment storedAssignment =
+                coordinator.getAssignment(
+                        "orders-group"
+                );
+
+        if (storedAssignment == null) {
+
+            throw new RuntimeException(
+                    "Assignment should exist"
+            );
+        }
+
+        if (!storedAssignment
+                .assignments()
+                .equals(assignment.assignments())) {
+
+            throw new RuntimeException(
+                    "Stored assignment is incorrect"
+            );
+        }
+
+        /*
+         * Consumer A leaves.
+         *
+         * Consumer B should receive
+         * all partitions.
+         */
+
+        assignment =
+                coordinator.leaveGroup(
+                        "orders-group",
+                        "consumer-A",
+                        4
+                );
+
+        System.out.println(
+                "After consumer-A leaves: "
+                        + assignment.assignments()
+        );
+
+        if (!assignment
+                .partitionsFor("consumer-B")
+                .equals(List.of(0, 1, 2, 3))) {
+
+            throw new RuntimeException(
+                    "Consumer-B should own all partitions"
+            );
+        }
+
+        /*
+         * Consumer B leaves.
+         *
+         * Group should disappear.
+         */
+
+        assignment =
+                coordinator.leaveGroup(
+                        "orders-group",
+                        "consumer-B",
+                        4
+                );
+
+        if (assignment != null) {
+
+            throw new RuntimeException(
+                    "Assignment should be null "
+                            + "after final member leaves"
+            );
+        }
+
+        if (groupManager.groupExists(
+                "orders-group"
+        )) {
+
+            throw new RuntimeException(
+                    "Group should not exist "
+                            + "after final member leaves"
+            );
+        }
+
+        if (coordinator.getAssignment(
+                "orders-group"
+        ) != null) {
+
+            throw new RuntimeException(
+                    "Assignment should be removed "
+                            + "after group becomes empty"
+            );
+        }
+
+        System.out.println();
+        System.out.println(
+                "ConsumerGroupCoordinator "
+                        + "verified successfully!"
+        );
+    }
+}
