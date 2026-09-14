@@ -1,6 +1,7 @@
 package com.buildyourownkafka.broker;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Partition {
@@ -10,21 +11,25 @@ public class Partition {
 
     private long nextOffset;
 
-    public Partition(int id, Path logFile) {
+    public Partition(int id, Path logDirectory) {
 
         if (id < 0) {
             throw new IllegalArgumentException(
                     "Partition id cannot be negative");
         }
 
-        if (logFile == null) {
+        if (logDirectory == null) {
             throw new IllegalArgumentException(
-                    "Log file cannot be null");
+                    "Log directory cannot be null");
         }
 
         this.id = id;
-        this.log = new PartitionLog(logFile);
-        this.nextOffset = log.nextOffset();
+
+        this.log =
+                new PartitionLog(logDirectory);
+
+        this.nextOffset =
+                log.nextOffset();
     }
 
     public int id() {
@@ -38,7 +43,11 @@ public class Partition {
                     "Record value cannot be null");
         }
 
-        Record record = new Record(nextOffset, value);
+        Record record =
+                new Record(
+                        nextOffset,
+                        value
+                );
 
         log.append(record);
 
@@ -63,13 +72,15 @@ public class Partition {
                     "Offset cannot be negative");
         }
 
-        List<Record> records = new java.util.ArrayList<>();
+        List<Record> records =
+                new ArrayList<>();
 
         long currentOffset = offset;
 
         while (currentOffset < nextOffset) {
 
-            Record record = log.read(currentOffset);
+            Record record =
+                    log.read(currentOffset);
 
             if (record == null) {
                 break;

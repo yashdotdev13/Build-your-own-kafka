@@ -16,6 +16,7 @@ com\buildyourownkafka\protocol\ResponseDecoder.class
 com\buildyourownkafka\broker\Record.class
 com\buildyourownkafka\protocol\CreateTopicPayload.class
 com\buildyourownkafka\broker\RequestDispatcher.class
+com\buildyourownkafka\client\PartitionLogSegmentTest.class
 com\buildyourownkafka\client\RecoveryProduceTest.class
 com\buildyourownkafka\Main.class
 com\buildyourownkafka\client\FetchResponsePayloadTest.class
@@ -23,6 +24,7 @@ com\buildyourownkafka\protocol\FrameEncoder.class
 com\buildyourownkafka\client\ProduceTest.class
 com\buildyourownkafka\protocol\ProducePayload.class
 com\buildyourownkafka\broker\PartitionLog.class
+com\buildyourownkafka\broker\LogSegment.class
 com\buildyourownkafka\protocol\RequestDecoder.class
 com\buildyourownkafka\broker\FetchRequestHandler.class
 com\buildyourownkafka\broker\PingRequestHandler.class
@@ -39,3 +41,4 @@ com\buildyourownkafka\broker\TopicManager.class
 com\buildyourownkafka\client\TestClient.class
 com\buildyourownkafka\protocol\ResponseEncoder.class
 com\buildyourownkafka\client\ProduceResponsePayloadTest.class
+com\buildyourownkafka\client\SegmentRotationTest.class

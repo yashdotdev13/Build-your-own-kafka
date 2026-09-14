@@ -1,134 +1,173 @@
 package com.buildyourownkafka.broker;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.EOFException;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 public class PartitionLog {
 
-    private final Path file;
+    private static final long MAX_RECORDS_PER_SEGMENT = 3;
 
-    public PartitionLog(Path file) {
-        this.file = file;
+    private final Path directory;
+
+    private final List<LogSegment> segments =
+            new ArrayList<>();
+
+    private LogSegment activeSegment;
+
+    public PartitionLog(Path directory) {
+
+        if (directory == null) {
+            throw new IllegalArgumentException(
+                    "Log directory cannot be null");
+        }
+
+        this.directory = directory;
 
         try {
-            Files.createDirectories(file.getParent());
-
-            if (!Files.exists(file)) {
-                Files.createFile(file);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to initialize partition log", e);
+            Files.createDirectories(directory);
+        } catch (Exception e) {
+            throw new RuntimeException(
+                    "Failed to initialize partition log", e);
         }
+
+        loadSegments();
     }
 
     public synchronized void append(Record record) {
 
-        try (DataOutputStream output =
-                     new DataOutputStream(
-                             Files.newOutputStream(
-                                     file,
-                                     java.nio.file.StandardOpenOption.APPEND))) {
-
-            output.writeLong(record.offset());
-            output.writeInt(record.value().length);
-            output.write(record.value());
-
-            output.flush();
-
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to append record to log", e);
+        if (record == null) {
+            throw new IllegalArgumentException(
+                    "Record cannot be null");
         }
+
+        if (activeSegment.recordCount()
+                >= MAX_RECORDS_PER_SEGMENT) {
+
+            createNewSegment(record.offset());
+        }
+
+        activeSegment.append(record);
     }
 
-    public synchronized Record read(long requestedOffset) {
+    public synchronized Record read(long offset) {
 
-        if (requestedOffset < 0) {
+        if (offset < 0) {
             throw new IllegalArgumentException(
                     "Offset cannot be negative");
         }
 
-        try (DataInputStream input =
-                     new DataInputStream(
-                             Files.newInputStream(file))) {
+        for (LogSegment segment : segments) {
 
-            while (true) {
+            Record record =
+                    segment.read(offset);
 
-                try {
-                    long offset = input.readLong();
-
-                    int valueLength = input.readInt();
-
-                    if (valueLength < 0) {
-                        throw new IOException(
-                                "Invalid record value length: " + valueLength);
-                    }
-
-                    byte[] value = input.readNBytes(valueLength);
-
-                    if (value.length != valueLength) {
-                        throw new EOFException(
-                                "Incomplete record in partition log");
-                    }
-
-                    if (offset == requestedOffset) {
-                        return new Record(offset, value);
-                    }
-
-                } catch (EOFException e) {
-                    return null;
-                }
+            if (record != null) {
+                return record;
             }
-
-        } catch (IOException e) {
-            throw new RuntimeException(
-                    "Failed to read record from log", e);
         }
-    }
 
+        return null;
+    }
 
     public synchronized long nextOffset() {
 
-        long nextOffset = 0;
+        if (segments.isEmpty()) {
+            return 0;
+        }
 
-        try (DataInputStream input =
-                     new DataInputStream(
-                             Files.newInputStream(file))) {
+        return activeSegment.nextOffset();
+    }
 
-            while (true) {
+    private void loadSegments() {
 
-                try {
-                    long offset = input.readLong();
+        try {
 
-                    int valueLength = input.readInt();
+            List<Path> files;
 
-                    if (valueLength < 0) {
-                        throw new IOException(
-                                "Invalid record value length: " + valueLength);
-                    }
+            try (var paths = Files.list(directory)) {
 
-                    long skipped = input.skip(valueLength);
-
-                    if (skipped != valueLength) {
-                        throw new EOFException(
-                                "Incomplete record in partition log");
-                    }
-
-                    nextOffset = offset + 1;
-
-                } catch (EOFException e) {
-                    break;
-                }
+                files =
+                        paths
+                                .filter(Files::isRegularFile)
+                                .filter(path ->
+                                        path.getFileName()
+                                                .toString()
+                                                .startsWith("segment-"))
+                                .filter(path ->
+                                        path.getFileName()
+                                                .toString()
+                                                .endsWith(".log"))
+                                .sorted(
+                                        Comparator.comparingLong(
+                                                this::extractSegmentId
+                                        )
+                                )
+                                .toList();
             }
 
-            return nextOffset;
+            if (files.isEmpty()) {
 
-        } catch (IOException e) {
+                createNewSegment(0);
+
+                return;
+            }
+
+            for (Path file : files) {
+
+                segments.add(
+                        new LogSegment(file)
+                );
+            }
+
+            activeSegment =
+                    segments.get(
+                            segments.size() - 1
+                    );
+
+        } catch (Exception e) {
+
             throw new RuntimeException(
-                    "Failed to determine next offset", e);
+                    "Failed to load log segments", e);
         }
+    }
+
+    private void createNewSegment(long baseOffset) {
+
+        Path segmentFile =
+                directory.resolve(
+                        "segment-" + baseOffset + ".log"
+                );
+
+        LogSegment segment =
+                new LogSegment(segmentFile);
+
+        segments.add(segment);
+
+        activeSegment = segment;
+
+        System.out.println(
+                "Created log segment: "
+                        + segmentFile.getFileName()
+        );
+    }
+
+    private long extractSegmentId(Path path) {
+
+        String fileName =
+                path.getFileName()
+                        .toString();
+
+        String id =
+                fileName
+                        .substring(
+                                "segment-".length(),
+                                fileName.length()
+                                        - ".log".length()
+                        );
+
+        return Long.parseLong(id);
     }
 }
