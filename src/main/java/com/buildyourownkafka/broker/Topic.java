@@ -33,25 +33,41 @@ public class Topic {
 
         this.name = name;
 
-        List<Partition> partitionList = new ArrayList<>();
+        List<Partition> partitionList =
+                new ArrayList<>();
 
         for (int i = 0; i < partitionCount; i++) {
 
+            /*
+             * Each partition gets its own directory.
+             *
+             * Example:
+             *
+             * data/topics/orders/partition-0
+             * data/topics/orders/partition-1
+             * data/topics/orders/partition-2
+             */
             Path partitionDirectory =
                     dataDirectory
                             .resolve(name)
                             .resolve("partition-" + i);
 
-            Path logFile =
-                    partitionDirectory.resolve("partition.log");
-
+            /*
+             * PartitionLog manages the directory
+             * and the segment files inside it.
+             */
             partitionList.add(
-                    new Partition(i, logFile)
+                    new Partition(
+                            i,
+                            partitionDirectory
+                    )
             );
         }
 
         this.partitions =
-                Collections.unmodifiableList(partitionList);
+                Collections.unmodifiableList(
+                        partitionList
+                );
     }
 
     public String name() {

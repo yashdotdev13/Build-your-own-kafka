@@ -9,26 +9,48 @@ public class PartitionLogRecoveryTest {
 
     public static void main(String[] args) {
 
-        Path logFile =
-                Path.of("data", "test-topic", "partition-0", "partition.log");
+        Path logDirectory =
+                Path.of(
+                        "data",
+                        "test-topic",
+                        "partition-0"
+                );
 
-        System.out.println("=== PROCESS 2: RECOVERY ===");
+        System.out.println(
+                "=== PROCESS 2: RECOVERY ==="
+        );
 
-        PartitionLog log = new PartitionLog(logFile);
+        PartitionLog log =
+                new PartitionLog(logDirectory);
 
-        Record record0 = log.read(0);
-        Record record1 = log.read(1);
-        Record record2 = log.read(2);
+        System.out.println(
+                "Recovered next offset: "
+                        + log.nextOffset()
+        );
+
+        Record record0 =
+                log.read(0);
+
+        Record record1 =
+                log.read(1);
+
+        Record record2 =
+                log.read(2);
 
         printRecord(record0);
         printRecord(record1);
         printRecord(record2);
     }
 
-    private static void printRecord(Record record) {
+    private static void printRecord(
+            Record record) {
 
         if (record == null) {
-            System.out.println("Record not found");
+
+            System.out.println(
+                    "Record not found"
+            );
+
             return;
         }
 
@@ -36,7 +58,9 @@ public class PartitionLogRecoveryTest {
                 "Recovered offset "
                         + record.offset()
                         + " -> "
-                        + new String(record.value())
+                        + new String(
+                        record.value()
+                )
         );
     }
 }
