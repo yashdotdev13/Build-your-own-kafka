@@ -88,4 +88,47 @@ public class PartitionLog {
                     "Failed to read record from log", e);
         }
     }
+
+
+    public synchronized long nextOffset() {
+
+        long nextOffset = 0;
+
+        try (DataInputStream input =
+                     new DataInputStream(
+                             Files.newInputStream(file))) {
+
+            while (true) {
+
+                try {
+                    long offset = input.readLong();
+
+                    int valueLength = input.readInt();
+
+                    if (valueLength < 0) {
+                        throw new IOException(
+                                "Invalid record value length: " + valueLength);
+                    }
+
+                    long skipped = input.skip(valueLength);
+
+                    if (skipped != valueLength) {
+                        throw new EOFException(
+                                "Incomplete record in partition log");
+                    }
+
+                    nextOffset = offset + 1;
+
+                } catch (EOFException e) {
+                    break;
+                }
+            }
+
+            return nextOffset;
+
+        } catch (IOException e) {
+            throw new RuntimeException(
+                    "Failed to determine next offset", e);
+        }
+    }
 }

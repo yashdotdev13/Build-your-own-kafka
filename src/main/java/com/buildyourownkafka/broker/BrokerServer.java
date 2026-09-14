@@ -2,6 +2,7 @@ package com.buildyourownkafka.broker;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.nio.file.Path;
 import java.net.Socket;
 
 public class BrokerServer {
@@ -20,7 +21,7 @@ public class BrokerServer {
 
     public BrokerServer(int port) {
         this.port = port;
-        this.topicManager = new TopicManager();
+        this.topicManager = new TopicManager(Path.of("data", "topics"));
     }
 
     public void start() throws IOException {

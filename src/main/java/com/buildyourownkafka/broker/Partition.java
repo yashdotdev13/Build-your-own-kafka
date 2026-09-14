@@ -1,56 +1,93 @@
 package com.buildyourownkafka.broker;
 
-import java.util.ArrayList;
-import java.util.Collections;
+import java.nio.file.Path;
 import java.util.List;
 
 public class Partition {
 
     private final int id;
-    private final List<Record> records = new ArrayList<>();
+    private final PartitionLog log;
 
-    public Partition(int id) {
+    private long nextOffset;
+
+    public Partition(int id, Path logFile) {
+
         if (id < 0) {
-            throw new IllegalArgumentException("Partition id cannot be negative");
+            throw new IllegalArgumentException(
+                    "Partition id cannot be negative");
         }
+
+        if (logFile == null) {
+            throw new IllegalArgumentException(
+                    "Log file cannot be null");
+        }
+
         this.id = id;
+        this.log = new PartitionLog(logFile);
+        this.nextOffset = log.nextOffset();
     }
+
     public int id() {
         return id;
     }
 
     public synchronized Record append(byte[] value) {
+
         if (value == null) {
-            throw new IllegalArgumentException("Record value cannot be null");
+            throw new IllegalArgumentException(
+                    "Record value cannot be null");
         }
 
-        long offset = records.size();
-        Record record = new Record(offset, value);
-        records.add(record);
+        Record record = new Record(nextOffset, value);
+
+        log.append(record);
+
+        nextOffset++;
+
         return record;
     }
 
     public synchronized Record read(long offset) {
-        if (offset < 0 || offset >= records.size()) {
+
+        if (offset < 0) {
             return null;
         }
 
-        return records.get((int) offset);
+        return log.read(offset);
     }
+
     public synchronized List<Record> readFrom(long offset) {
 
         if (offset < 0) {
-            throw new IllegalArgumentException("Offset cannot be negative");
+            throw new IllegalArgumentException(
+                    "Offset cannot be negative");
         }
-        if (offset >= records.size()) {
-            return Collections.emptyList();
+
+        List<Record> records = new java.util.ArrayList<>();
+
+        long currentOffset = offset;
+
+        while (currentOffset < nextOffset) {
+
+            Record record = log.read(currentOffset);
+
+            if (record == null) {
+                break;
+            }
+
+            records.add(record);
+
+            currentOffset++;
         }
-        return List.copyOf(records.subList((int) offset, records.size()));
+
+        return List.copyOf(records);
     }
+
     public synchronized long nextOffset() {
-        return records.size();
+        return nextOffset;
     }
+
     public synchronized int size() {
-        return records.size();
+        return (int) nextOffset;
     }
 }

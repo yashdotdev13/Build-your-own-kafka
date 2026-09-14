@@ -3,6 +3,8 @@ package com.buildyourownkafka.client;
 import com.buildyourownkafka.broker.Partition;
 import com.buildyourownkafka.broker.Record;
 
+
+import java.nio.file.Path;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -10,7 +12,16 @@ public class PartitionTest {
 
     public static void main(String[] args) {
 
-        Partition partition = new Partition(0);
+        Partition partition =
+                new Partition(
+                        0,
+                        Path.of(
+                                "data",
+                                "test-topic",
+                                "partition-0",
+                                "partition.log"
+                        )
+                );
 
         // Append records
         Record first = partition.append("Hello".getBytes(StandardCharsets.UTF_8));

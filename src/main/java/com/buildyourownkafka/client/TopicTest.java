@@ -1,5 +1,6 @@
 package com.buildyourownkafka.client;
 
+import java.nio.file.Path;
 import com.buildyourownkafka.broker.Topic;
 import com.buildyourownkafka.broker.TopicManager;
 
@@ -7,7 +8,8 @@ public class TopicTest {
 
     public static void main(String[] args) {
 
-        TopicManager topicManager = new TopicManager();
+        TopicManager topicManager =
+                new TopicManager(Path.of("data", "test-topics"));
         Topic orders = topicManager.createTopic("orders", 3);
         Topic payments = topicManager.createTopic("payments", 2);
         System.out.println("Created topic: " + orders.name());
