@@ -1,12 +1,17 @@
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\BrokerServer.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\ClientConnection.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\CommitOffsetRequestHandler.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\ConsumerGroup.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\ConsumerGroupCoordinator.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\ConsumerGroupManager.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\ConsumerOffsetStore.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\CreateTopicRequestHandler.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\FetchOffsetRequestHandler.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\FetchRequestHandler.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\LogSegment.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Partition.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\PartitionAssigner.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\PartitionAssignment.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\PartitionLog.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\PingRequestHandler.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\ProduceRequestHandler.java
@@ -17,6 +22,9 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Topi
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\TopicManager.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\Consumer.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerCommitTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupCoordinatorTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupManagerTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerOffsetStoreTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerPollTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerTest.java
@@ -26,6 +34,8 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\Fetc
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\FetchTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\OffsetHandlerTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\OffsetPayloadTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\PartitionAssignerTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\PartitionAssignmentTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\PartitionLogRecoveryTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\PartitionLogSegmentTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\PartitionLogTest.java
