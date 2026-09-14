@@ -3,6 +3,7 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Clie
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\CreateTopicRequestHandler.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\FetchRequestHandler.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Partition.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\PartitionLog.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\PingRequestHandler.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\ProduceRequestHandler.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Record.java
@@ -13,6 +14,7 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Topi
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\FetchPayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\FetchResponsePayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\FetchTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\PartitionLogTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\PartitionTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ProducePayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ProduceResponsePayloadTest.java
