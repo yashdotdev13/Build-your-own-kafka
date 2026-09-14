@@ -4,6 +4,7 @@ com\buildyourownkafka\broker\RequestHandler.class
 com\buildyourownkafka\protocol\FetchPayload.class
 com\buildyourownkafka\protocol\RequestEncoder.class
 com\buildyourownkafka\broker\ProduceRequestHandler.class
+com\buildyourownkafka\client\PartitionLogRecoveryTest.class
 com\buildyourownkafka\broker\BrokerServer.class
 com\buildyourownkafka\broker\Topic.class
 com\buildyourownkafka\client\FetchTest.class
