@@ -17,6 +17,7 @@ com\buildyourownkafka\broker\Record.class
 com\buildyourownkafka\protocol\CreateTopicPayload.class
 com\buildyourownkafka\broker\RequestDispatcher.class
 com\buildyourownkafka\client\PartitionLogSegmentTest.class
+com\buildyourownkafka\client\SegmentRecoveryTest.class
 com\buildyourownkafka\client\RecoveryProduceTest.class
 com\buildyourownkafka\Main.class
 com\buildyourownkafka\client\FetchResponsePayloadTest.class
