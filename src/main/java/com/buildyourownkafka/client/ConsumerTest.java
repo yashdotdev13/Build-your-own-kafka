@@ -2,35 +2,42 @@ package com.buildyourownkafka.client;
 
 public class ConsumerTest {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws Exception {
 
-        Consumer consumer =
-                new Consumer(
-                        "orders",
-                        1,
-                        0
-                );
+        try (Consumer consumer =
+                     new Consumer(
+                             "localhost",
+                             9092,
+                             "orders",
+                             1,
+                             0
+                     )) {
 
-        System.out.println(
-                "Topic: "
-                        + consumer.topic()
-        );
+            System.out.println(
+                    "Consumer connected."
+            );
 
-        System.out.println(
-                "Partition: "
-                        + consumer.partition()
-        );
+            System.out.println(
+                    "Topic: "
+                            + consumer.topic()
+            );
 
-        System.out.println(
-                "Current offset: "
-                        + consumer.currentOffset()
-        );
+            System.out.println(
+                    "Partition: "
+                            + consumer.partition()
+            );
 
-        consumer.advanceOffset(3);
+            System.out.println(
+                    "Current offset: "
+                            + consumer.currentOffset()
+            );
 
-        System.out.println(
-                "Current offset after advance: "
-                        + consumer.currentOffset()
-        );
+            consumer.advanceOffset(3);
+
+            System.out.println(
+                    "Current offset after advance: "
+                            + consumer.currentOffset()
+            );
+        }
     }
 }

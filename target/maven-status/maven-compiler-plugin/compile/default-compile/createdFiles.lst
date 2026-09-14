@@ -37,6 +37,7 @@ com\buildyourownkafka\broker\Partition.class
 com\buildyourownkafka\client\RecoveryFetchTest.class
 com\buildyourownkafka\protocol\ProduceResponsePayload.class
 com\buildyourownkafka\client\TopicTest.class
+com\buildyourownkafka\client\ConsumerPollTest.class
 com\buildyourownkafka\client\PartitionLogTest.class
 com\buildyourownkafka\protocol\FetchResponsePayload.class
 com\buildyourownkafka\protocol\FrameDecoder.class

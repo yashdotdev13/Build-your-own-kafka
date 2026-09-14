@@ -21,18 +21,28 @@ public class PartitionLog {
 
         if (directory == null) {
             throw new IllegalArgumentException(
-                    "Log directory cannot be null");
+                    "Log directory cannot be null"
+            );
         }
 
         this.directory = directory;
 
         try {
+
             Files.createDirectories(directory);
+
         } catch (Exception e) {
+
             throw new RuntimeException(
-                    "Failed to initialize partition log", e);
+                    "Failed to initialize partition log",
+                    e
+            );
         }
 
+        // Migrate old single-file log if it exists
+        migrateLegacyLog();
+
+        // Load segmented logs
         loadSegments();
     }
 
@@ -40,9 +50,14 @@ public class PartitionLog {
 
         if (record == null) {
             throw new IllegalArgumentException(
-                    "Record cannot be null");
+                    "Record cannot be null"
+            );
         }
 
+        /*
+         * Rotate the segment when the current segment
+         * reaches the maximum number of records.
+         */
         if (activeSegment.recordCount()
                 >= MAX_RECORDS_PER_SEGMENT) {
 
@@ -56,9 +71,16 @@ public class PartitionLog {
 
         if (offset < 0) {
             throw new IllegalArgumentException(
-                    "Offset cannot be negative");
+                    "Offset cannot be negative"
+            );
         }
 
+        /*
+         * For now we scan segments sequentially.
+         *
+         * Later we can optimize this by determining
+         * the correct segment directly from the offset.
+         */
         for (LogSegment segment : segments) {
 
             Record record =
@@ -81,6 +103,78 @@ public class PartitionLog {
         return activeSegment.nextOffset();
     }
 
+    /**
+     * Migrates the old single-file storage format:
+     *
+     *     partition.log
+     *
+     * into the new segmented format:
+     *
+     *     segment-0.log
+     *
+     * The record format is unchanged, so we only need
+     * to rename/move the file.
+     */
+    private void migrateLegacyLog() {
+
+        Path legacyFile =
+                directory.resolve("partition.log");
+
+        if (!Files.exists(legacyFile)) {
+            return;
+        }
+
+        Path firstSegment =
+                directory.resolve("segment-0.log");
+
+        try {
+
+            /*
+             * Safety check:
+             *
+             * We don't want to silently overwrite an
+             * existing segmented log.
+             */
+            if (Files.exists(firstSegment)) {
+
+                throw new IllegalStateException(
+                        "Both legacy and segmented log exist: "
+                                + directory
+                );
+            }
+
+            Files.move(
+                    legacyFile,
+                    firstSegment
+            );
+
+            System.out.println(
+                    "Migrated legacy log: "
+                            + legacyFile.getFileName()
+                            + " -> "
+                            + firstSegment.getFileName()
+            );
+
+        } catch (Exception e) {
+
+            throw new RuntimeException(
+                    "Failed to migrate legacy log: "
+                            + legacyFile,
+                    e
+            );
+        }
+    }
+
+    /**
+     * Loads all segment files from disk.
+     *
+     * Segment files are ordered using their base offset:
+     *
+     * segment-0.log
+     * segment-3.log
+     * segment-6.log
+     * ...
+     */
     private void loadSegments() {
 
         try {
@@ -95,11 +189,13 @@ public class PartitionLog {
                                 .filter(path ->
                                         path.getFileName()
                                                 .toString()
-                                                .startsWith("segment-"))
+                                                .startsWith("segment-")
+                                )
                                 .filter(path ->
                                         path.getFileName()
                                                 .toString()
-                                                .endsWith(".log"))
+                                                .endsWith(".log")
+                                )
                                 .sorted(
                                         Comparator.comparingLong(
                                                 this::extractSegmentId
@@ -108,6 +204,11 @@ public class PartitionLog {
                                 .toList();
             }
 
+            /*
+             * No segment exists.
+             *
+             * This is a brand-new partition.
+             */
             if (files.isEmpty()) {
 
                 createNewSegment(0);
@@ -115,6 +216,9 @@ public class PartitionLog {
                 return;
             }
 
+            /*
+             * Load every existing segment.
+             */
             for (Path file : files) {
 
                 segments.add(
@@ -122,6 +226,10 @@ public class PartitionLog {
                 );
             }
 
+            /*
+             * The last segment becomes the active
+             * segment for future writes.
+             */
             activeSegment =
                     segments.get(
                             segments.size() - 1
@@ -130,10 +238,16 @@ public class PartitionLog {
         } catch (Exception e) {
 
             throw new RuntimeException(
-                    "Failed to load log segments", e);
+                    "Failed to load log segments",
+                    e
+            );
         }
     }
 
+    /**
+     * Creates a new segment starting at the supplied
+     * base offset.
+     */
     private void createNewSegment(long baseOffset) {
 
         Path segmentFile =
@@ -154,6 +268,17 @@ public class PartitionLog {
         );
     }
 
+    /**
+     * Extracts the base offset from a segment filename.
+     *
+     * Example:
+     *
+     * segment-6.log
+     *
+     * becomes:
+     *
+     * 6
+     */
     private long extractSegmentId(Path path) {
 
         String fileName =
@@ -161,12 +286,11 @@ public class PartitionLog {
                         .toString();
 
         String id =
-                fileName
-                        .substring(
-                                "segment-".length(),
-                                fileName.length()
-                                        - ".log".length()
-                        );
+                fileName.substring(
+                        "segment-".length(),
+                        fileName.length()
+                                - ".log".length()
+                );
 
         return Long.parseLong(id);
     }
