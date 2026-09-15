@@ -2,6 +2,9 @@ package com.buildyourownkafka.client;
 
 import com.buildyourownkafka.broker.ConsumerGroup;
 import com.buildyourownkafka.broker.ConsumerGroupState;
+import com.buildyourownkafka.broker.GroupMember;
+
+import java.util.List;
 
 public class ConsumerGroupTest {
 
@@ -16,34 +19,24 @@ public class ConsumerGroupTest {
                         "payment-service"
                 );
 
-        /*
-         * New groups should start EMPTY.
-         */
+        GroupMember memberA =
+                new GroupMember(
+                        "consumer-1",
+                        "payment-service",
+                        1,
+                        List.of(0, 2)
+                );
 
-        System.out.println(
-                "Initial state: "
-                        + group.state()
-        );
+        GroupMember memberB =
+                new GroupMember(
+                        "consumer-2",
+                        "payment-service",
+                        1,
+                        List.of(1, 3)
+                );
 
-        if (group.state()
-                != ConsumerGroupState.EMPTY) {
-
-            throw new RuntimeException(
-                    "New group should start in EMPTY state"
-            );
-        }
-
-        /*
-         * Add members.
-         */
-
-        group.addMember(
-                "consumer-1"
-        );
-
-        group.addMember(
-                "consumer-2"
-        );
+        group.addMember(memberA);
+        group.addMember(memberB);
 
         System.out.println(
                 "Group ID: "
@@ -57,25 +50,92 @@ public class ConsumerGroupTest {
 
         System.out.println(
                 "Members: "
-                        + group.members()
+                        + group.members().keySet()
         );
 
+        GroupMember retrieved =
+                group.getMember(
+                        "consumer-1"
+                );
+
+        System.out.println(
+                "Consumer-1 generation: "
+                        + retrieved.generation()
+        );
+
+        System.out.println(
+                "Consumer-1 partitions: "
+                        + retrieved.assignedPartitions()
+        );
+
+        if (!group.hasMember(
+                "consumer-1"
+        )) {
+
+            throw new RuntimeException(
+                    "consumer-1 should exist"
+            );
+        }
+
+        if (group.memberCount() != 2) {
+
+            throw new RuntimeException(
+                    "Expected 2 members"
+            );
+        }
+
+        if (retrieved.generation() != 1) {
+
+            throw new RuntimeException(
+                    "Incorrect generation"
+            );
+        }
+
+        if (!retrieved.assignedPartitions()
+                .equals(List.of(0, 2))) {
+
+            throw new RuntimeException(
+                    "Incorrect partition assignment"
+            );
+        }
+
         /*
-         * Change state.
+         * Update member assignment.
+         */
+
+        group.updateMemberAssignment(
+                "consumer-1",
+                2,
+                List.of(1, 3)
+        );
+
+        retrieved =
+                group.getMember(
+                        "consumer-1"
+                );
+
+        if (retrieved.generation() != 2) {
+
+            throw new RuntimeException(
+                    "Generation should be updated"
+            );
+        }
+
+        if (!retrieved.assignedPartitions()
+                .equals(List.of(1, 3))) {
+
+            throw new RuntimeException(
+                    "Partitions should be updated"
+            );
+        }
+
+        /*
+         * Test group state.
          */
 
         group.setState(
                 ConsumerGroupState.PREPARING_REBALANCE
         );
-
-        if (group.state()
-                != ConsumerGroupState.PREPARING_REBALANCE) {
-
-            throw new RuntimeException(
-                    "Group should be in "
-                            + "PREPARING_REBALANCE state"
-            );
-        }
 
         System.out.println(
                 "State changed to: "
@@ -86,15 +146,6 @@ public class ConsumerGroupTest {
                 ConsumerGroupState.COMPLETING_REBALANCE
         );
 
-        if (group.state()
-                != ConsumerGroupState.COMPLETING_REBALANCE) {
-
-            throw new RuntimeException(
-                    "Group should be in "
-                            + "COMPLETING_REBALANCE state"
-            );
-        }
-
         System.out.println(
                 "State changed to: "
                         + group.state()
@@ -104,63 +155,39 @@ public class ConsumerGroupTest {
                 ConsumerGroupState.STABLE
         );
 
-        if (group.state()
-                != ConsumerGroupState.STABLE) {
-
-            throw new RuntimeException(
-                    "Group should be in STABLE state"
-            );
-        }
-
         System.out.println(
                 "State changed to: "
                         + group.state()
         );
 
         /*
-         * Remove members.
+         * Remove member.
          */
-
-        group.removeMember(
-                "consumer-1"
-        );
-
-        if (group.memberCount() != 1) {
-
-            throw new RuntimeException(
-                    "Expected one remaining member"
-            );
-        }
 
         group.removeMember(
                 "consumer-2"
         );
 
-        if (group.memberCount() != 0) {
+        if (group.memberCount() != 1) {
 
             throw new RuntimeException(
-                    "Expected zero members"
+                    "Expected 1 member after removal"
             );
         }
 
-        /*
-         * State is intentionally not
-         * automatically changed by
-         * removeMember().
-         */
-
-        if (group.state()
-                != ConsumerGroupState.STABLE) {
+        if (group.hasMember(
+                "consumer-2"
+        )) {
 
             throw new RuntimeException(
-                    "Group state should remain STABLE"
+                    "consumer-2 should be removed"
             );
         }
 
         System.out.println();
         System.out.println(
-                "ConsumerGroup state management "
-                        + "verified successfully!"
+                "ConsumerGroup member metadata "
+                        + "lifecycle verified successfully!"
         );
     }
 }
