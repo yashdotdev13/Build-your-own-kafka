@@ -20,6 +20,7 @@ com\buildyourownkafka\protocol\FetchOffsetPayload.class
 com\buildyourownkafka\Main.class
 com\buildyourownkafka\client\FetchResponsePayloadTest.class
 com\buildyourownkafka\protocol\FrameEncoder.class
+com\buildyourownkafka\broker\ConsumerGroupState.class
 com\buildyourownkafka\client\OffsetPayloadTest.class
 com\buildyourownkafka\client\Consumer.class
 com\buildyourownkafka\broker\FetchRequestHandler.class
@@ -52,6 +53,7 @@ com\buildyourownkafka\protocol\Request.class
 com\buildyourownkafka\protocol\ResponseDecoder.class
 com\buildyourownkafka\protocol\CreateTopicPayload.class
 com\buildyourownkafka\client\FetchOffsetResponsePayloadTest.class
+com\buildyourownkafka\client\ConsumerGroupStateTest.class
 com\buildyourownkafka\client\ProduceTest.class
 com\buildyourownkafka\protocol\ProducePayload.class
 com\buildyourownkafka\broker\PartitionLog.class
