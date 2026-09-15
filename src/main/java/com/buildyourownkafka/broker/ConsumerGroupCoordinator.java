@@ -34,15 +34,58 @@ public class ConsumerGroupCoordinator {
         validateMemberId(memberId);
         validatePartitionCount(partitionCount);
 
+        /*
+         * Get or create the consumer group.
+         */
+        groupManager.getOrCreateGroup(
+                groupId
+        );
+
+        /*
+         * A membership change means
+         * the group is preparing to rebalance.
+         */
+        transitionTo(
+                groupId,
+                ConsumerGroupState.PREPARING_REBALANCE
+        );
+
+        /*
+         * Add the new member.
+         */
         groupManager.addMember(
                 groupId,
                 memberId
         );
 
-        return rebalance(
+        /*
+         * Membership is now established.
+         * The coordinator is completing the rebalance.
+         */
+        transitionTo(
                 groupId,
-                partitionCount
+                ConsumerGroupState.COMPLETING_REBALANCE
         );
+
+        /*
+         * Calculate the new partition assignment.
+         */
+        PartitionAssignment assignment =
+                rebalance(
+                        groupId,
+                        partitionCount
+                );
+
+        /*
+         * Rebalance completed successfully.
+         * Group is now stable.
+         */
+        transitionTo(
+                groupId,
+                ConsumerGroupState.STABLE
+        );
+
+        return assignment;
     }
 
     public synchronized PartitionAssignment leaveGroup(
@@ -55,11 +98,38 @@ public class ConsumerGroupCoordinator {
         validateMemberId(memberId);
         validatePartitionCount(partitionCount);
 
+        /*
+         * The group must already exist.
+         */
+        if (!groupManager.groupExists(groupId)) {
+
+            throw new ConsumerGroupException(
+                    "Consumer group does not exist: "
+                            + groupId
+            );
+        }
+
+        /*
+         * A membership change starts
+         * another rebalance.
+         */
+        transitionTo(
+                groupId,
+                ConsumerGroupState.PREPARING_REBALANCE
+        );
+
+        /*
+         * Remove the member.
+         */
         groupManager.removeMember(
                 groupId,
                 memberId
         );
 
+        /*
+         * If this was the final member,
+         * ConsumerGroupManager removes the group.
+         */
         if (!groupManager.groupExists(groupId)) {
 
             assignments.remove(groupId);
@@ -67,10 +137,33 @@ public class ConsumerGroupCoordinator {
             return null;
         }
 
-        return rebalance(
+        /*
+         * There are still active members,
+         * so complete the new rebalance.
+         */
+        transitionTo(
                 groupId,
-                partitionCount
+                ConsumerGroupState.COMPLETING_REBALANCE
         );
+
+        /*
+         * Calculate the new assignment.
+         */
+        PartitionAssignment assignment =
+                rebalance(
+                        groupId,
+                        partitionCount
+                );
+
+        /*
+         * Group is stable again.
+         */
+        transitionTo(
+                groupId,
+                ConsumerGroupState.STABLE
+        );
+
+        return assignment;
     }
 
     public synchronized PartitionAssignment getAssignment(
@@ -79,7 +172,9 @@ public class ConsumerGroupCoordinator {
 
         validateGroupId(groupId);
 
-        return assignments.get(groupId);
+        return assignments.get(
+                groupId
+        );
     }
 
     private PartitionAssignment rebalance(
@@ -99,6 +194,29 @@ public class ConsumerGroupCoordinator {
         );
 
         return assignment;
+    }
+
+    private void transitionTo(
+            String groupId,
+            ConsumerGroupState state
+    ) {
+
+        ConsumerGroup group =
+                groupManager.getGroup(
+                        groupId
+                );
+
+        if (group == null) {
+
+            throw new ConsumerGroupException(
+                    "Consumer group does not exist: "
+                            + groupId
+            );
+        }
+
+        group.setState(
+                state
+        );
     }
 
     private void validateGroupId(
