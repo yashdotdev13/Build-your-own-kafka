@@ -20,205 +20,50 @@ public class ProduceTest {
 
     public static void main(String[] args) throws Exception {
 
-        try (Socket socket =
-                     new Socket("localhost", 9092)) {
+        try (Socket socket = new Socket("localhost", 9092)) {
+            DataInputStream input = new DataInputStream(socket.getInputStream());
+            DataOutputStream output = new DataOutputStream(socket.getOutputStream());
+            FrameEncoder frameEncoder = new FrameEncoder(output);
+            FrameDecoder frameDecoder = new FrameDecoder(input);
+            RequestEncoder requestEncoder = new RequestEncoder(output);
+            ResponseDecoder responseDecoder = new ResponseDecoder(input);
+            System.out.println("Connected to broker.");
 
-            DataInputStream input =
-                    new DataInputStream(
-                            socket.getInputStream()
-                    );
-
-            DataOutputStream output =
-                    new DataOutputStream(
-                            socket.getOutputStream()
-                    );
-
-            FrameEncoder frameEncoder =
-                    new FrameEncoder(output);
-
-            FrameDecoder frameDecoder =
-                    new FrameDecoder(input);
-
-            RequestEncoder requestEncoder =
-                    new RequestEncoder(output);
-
-            ResponseDecoder responseDecoder =
-                    new ResponseDecoder(input);
-
-            System.out.println(
-                    "Connected to broker."
-            );
-
-            // ========================================
-            // CREATE TOPIC
-            // ========================================
-
-            CreateTopicPayload topicPayload =
-                    new CreateTopicPayload(
-                            "orders",
-                            3
-                    );
-
-            Request createTopicRequest =
-                    new Request(
-                            Request.CREATE_TOPIC,
-                            (short) 1,
-                            100,
-                            topicPayload.encode()
-                    );
-
-            requestEncoder.encode(
-                    createTopicRequest
-            );
-
-            Response createTopicResponse =
-                    responseDecoder.decode();
+            CreateTopicPayload topicPayload = new CreateTopicPayload("orders", 3);
+            Request createTopicRequest = new Request(Request.CREATE_TOPIC, (short) 1, 100, topicPayload.encode());
+            requestEncoder.encode(createTopicRequest);
+            Response createTopicResponse = responseDecoder.decode();
 
             System.out.println();
-            System.out.println(
-                    "CREATE_TOPIC RESPONSE"
-            );
-
-            System.out.println(
-                    "Correlation ID: " +
-                            createTopicResponse.correlationId()
-            );
-
-            System.out.println(
-                    "Status: " +
-                            createTopicResponse.status()
-            );
-
-            System.out.println(
-                    "Payload: " +
-                            new String(
-                                    createTopicResponse.payload(),
-                                    StandardCharsets.UTF_8
-                            )
-            );
-
-            // ========================================
-            // PRODUCE #1
-            // ========================================
-
-            produce(
-                    requestEncoder,
-                    responseDecoder,
-                    "orders",
-                    1,
-                    "order-123",
-                    101
-            );
-
-            // ========================================
-            // PRODUCE #2
-            // ========================================
-
-            produce(
-                    requestEncoder,
-                    responseDecoder,
-                    "orders",
-                    1,
-                    "order-456",
-                    102
-            );
-
-            // ========================================
-            // PRODUCE #3
-            // ========================================
-
-            produce(
-                    requestEncoder,
-                    responseDecoder,
-                    "orders",
-                    1,
-                    "order-789",
-                    103
-            );
+            System.out.println("CREATE_TOPIC RESPONSE");
+            System.out.println("Correlation ID: " + createTopicResponse.correlationId());
+            System.out.println("Status: " + createTopicResponse.status());
+            System.out.println("Payload: " + new String(createTopicResponse.payload(), StandardCharsets.UTF_8));
+            produce(requestEncoder, responseDecoder, "orders", 1, "order-123", 101);
+            produce(requestEncoder, responseDecoder, "orders", 1, "order-456", 102);
+            produce(requestEncoder, responseDecoder, "orders", 1, "order-789", 103);
         }
     }
 
-    private static void produce(
-            RequestEncoder requestEncoder,
-            ResponseDecoder responseDecoder,
-            String topic,
-            int partition,
-            String value,
-            int correlationId
-    ) throws Exception {
+    private static void produce(RequestEncoder requestEncoder, ResponseDecoder responseDecoder, String topic, int partition, String value, int correlationId) throws Exception {
 
-        ProducePayload payload =
-                new ProducePayload(
-                        topic,
-                        partition,
-                        value.getBytes(
-                                StandardCharsets.UTF_8
-                        )
-                );
-
-        Request request =
-                new Request(
-                        Request.PRODUCE,
-                        (short) 1,
-                        correlationId,
-                        payload.encode()
-                );
-
-        // Send request
+        ProducePayload payload = new ProducePayload(topic, partition, value.getBytes(StandardCharsets.UTF_8));
+        Request request = new Request(Request.PRODUCE, (short) 1, correlationId, payload.encode());
         requestEncoder.encode(request);
-
-        // Receive response
-        Response response =
-                responseDecoder.decode();
+        Response response = responseDecoder.decode();
 
         System.out.println();
-        System.out.println(
-                "PRODUCE RESPONSE"
-        );
-
-        System.out.println(
-                "Correlation ID: " +
-                        response.correlationId()
-        );
-
-        System.out.println(
-                "Status: " +
-                        response.status()
-        );
-
+        System.out.println("PRODUCE RESPONSE");
+        System.out.println("Correlation ID: " + response.correlationId());
+        System.out.println("Status: " + response.status());
         if (response.status() == Response.SUCCESS) {
-
-            ProduceResponsePayload responsePayload =
-                    ProduceResponsePayload.decode(
-                            response.payload()
-                    );
-
-            System.out.println(
-                    "Topic: " + topic
-            );
-
-            System.out.println(
-                    "Partition: " + partition
-            );
-
-            System.out.println(
-                    "Value: " + value
-            );
-
-            System.out.println(
-                    "Offset: " +
-                            responsePayload.offset()
-            );
-
+            ProduceResponsePayload responsePayload = ProduceResponsePayload.decode(response.payload());
+            System.out.println("Topic: " + topic);
+            System.out.println("Partition: " + partition);
+            System.out.println("Value: " + value);
+            System.out.println("Offset: " + responsePayload.offset());
         } else {
-
-            System.out.println(
-                    "Error: " +
-                            new String(
-                                    response.payload(),
-                                    StandardCharsets.UTF_8
-                            )
-            );
+            System.out.println("Error: " + new String(response.payload(), StandardCharsets.UTF_8));
         }
     }
 }

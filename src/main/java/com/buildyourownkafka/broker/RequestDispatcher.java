@@ -15,13 +15,6 @@ public class RequestDispatcher {
         register(Request.CREATE_TOPIC, new CreateTopicRequestHandler(topicManager));
         register(Request.PRODUCE, new ProduceRequestHandler(topicManager));
         register(Request.FETCH, new FetchRequestHandler(topicManager));
-
-        /*
-         * Consumer offset operations.
-         *
-         * These handlers will use the shared
-         * ConsumerOffsetStore owned by the broker.
-         */
         register(Request.COMMIT_OFFSET, new CommitOffsetRequestHandler(consumerOffsetStore));
         register(Request.FETCH_OFFSET, new FetchOffsetRequestHandler(consumerOffsetStore));
     }

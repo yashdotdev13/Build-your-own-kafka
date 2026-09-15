@@ -26,11 +26,6 @@ public class LogSegment {
         } catch (IOException e) {
             throw new RuntimeException("Failed to initialize log segment", e);
         }
-
-        /*
-         * Recover the number of records already present
-         * in this segment.
-         */
         this.recordCount = countRecords();
     }
 

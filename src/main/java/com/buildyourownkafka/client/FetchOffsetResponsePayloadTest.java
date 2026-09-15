@@ -6,24 +6,10 @@ public class FetchOffsetResponsePayloadTest {
 
     public static void main(String[] args) {
 
-        System.out.println(
-                "=== FETCH OFFSET RESPONSE TEST ==="
-        );
-
-        FetchOffsetResponsePayload payload =
-                new FetchOffsetResponsePayload(7);
-
-        byte[] bytes =
-                payload.encode();
-
-        FetchOffsetResponsePayload decoded =
-                FetchOffsetResponsePayload.decode(
-                        bytes
-                );
-
-        System.out.println(
-                "Decoded offset: "
-                        + decoded.offset()
-        );
+        System.out.println("=== FETCH OFFSET RESPONSE TEST ===");
+        FetchOffsetResponsePayload payload = new FetchOffsetResponsePayload(7);
+        byte[] bytes = payload.encode();
+        FetchOffsetResponsePayload decoded = FetchOffsetResponsePayload.decode(bytes);
+        System.out.println("Decoded offset: " + decoded.offset());
     }
 }
