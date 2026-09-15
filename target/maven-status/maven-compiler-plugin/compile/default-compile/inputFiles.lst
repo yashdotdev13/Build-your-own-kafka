@@ -10,6 +10,7 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Cons
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\CreateTopicRequestHandler.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\FetchOffsetRequestHandler.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\FetchRequestHandler.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\GroupMember.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\LogSegment.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Partition.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\PartitionAssigner.java
@@ -35,6 +36,7 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\Fetc
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\FetchPayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\FetchResponsePayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\FetchTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\GroupMemberTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\OffsetHandlerTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\OffsetPayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\PartitionAssignerTest.java

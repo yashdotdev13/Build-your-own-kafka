@@ -1,15 +1,16 @@
 package com.buildyourownkafka.broker;
 
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class ConsumerGroup {
 
     private final String groupId;
 
-    private final Set<String> members =
-            new HashSet<>();
+    private final Map<String, GroupMember> members =
+            new HashMap<>();
 
     private ConsumerGroupState state;
 
@@ -30,12 +31,29 @@ public class ConsumerGroup {
     }
 
     public synchronized void addMember(
-            String memberId
+            GroupMember member
     ) {
 
-        validateMemberId(memberId);
+        if (member == null) {
 
-        members.add(memberId);
+            throw new IllegalArgumentException(
+                    "Group member cannot be null"
+            );
+        }
+
+        if (!groupId.equals(
+                member.groupId()
+        )) {
+
+            throw new IllegalArgumentException(
+                    "Member belongs to a different group"
+            );
+        }
+
+        members.put(
+                member.memberId(),
+                member
+        );
     }
 
     public synchronized void removeMember(
@@ -61,18 +79,26 @@ public class ConsumerGroup {
 
         validateMemberId(memberId);
 
-        return members.contains(memberId);
+        return members.containsKey(memberId);
     }
 
-    public synchronized Set<String> members() {
+    public synchronized GroupMember getMember(
+            String memberId
+    ) {
 
-        return Collections.unmodifiableSet(
-                new HashSet<>(members)
+        validateMemberId(memberId);
+
+        return members.get(memberId);
+    }
+
+    public synchronized Map<String, GroupMember> members() {
+
+        return Collections.unmodifiableMap(
+                new HashMap<>(members)
         );
     }
 
     public synchronized ConsumerGroupState state() {
-
         return state;
     }
 
@@ -88,6 +114,46 @@ public class ConsumerGroup {
         }
 
         this.state = state;
+    }
+
+    public synchronized void updateMemberAssignment(
+            String memberId,
+            int generation,
+            List<Integer> partitions
+    ) {
+
+        validateMemberId(memberId);
+
+        if (partitions == null) {
+
+            throw new IllegalArgumentException(
+                    "Partitions cannot be null"
+            );
+        }
+
+        GroupMember existingMember =
+                members.get(memberId);
+
+        if (existingMember == null) {
+
+            throw new ConsumerGroupException(
+                    "Member does not exist: "
+                            + memberId
+            );
+        }
+
+        GroupMember updatedMember =
+                new GroupMember(
+                        existingMember.memberId(),
+                        existingMember.groupId(),
+                        generation,
+                        partitions
+                );
+
+        members.put(
+                memberId,
+                updatedMember
+        );
     }
 
     private void validateMemberId(

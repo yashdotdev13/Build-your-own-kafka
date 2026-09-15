@@ -12,9 +12,11 @@ com\buildyourownkafka\client\ConsumerGroupTest.class
 com\buildyourownkafka\broker\CommitOffsetRequestHandler.class
 com\buildyourownkafka\client\PartitionTest.class
 com\buildyourownkafka\broker\Record.class
+com\buildyourownkafka\client\GroupMemberTest.class
 com\buildyourownkafka\broker\RequestDispatcher.class
 com\buildyourownkafka\client\PartitionLogSegmentTest.class
 com\buildyourownkafka\client\SegmentRecoveryTest.class
+com\buildyourownkafka\broker\GroupMember.class
 com\buildyourownkafka\client\RecoveryProduceTest.class
 com\buildyourownkafka\protocol\FetchOffsetPayload.class
 com\buildyourownkafka\Main.class

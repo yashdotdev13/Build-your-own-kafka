@@ -111,8 +111,16 @@ public class ConsumerGroupManager {
         ConsumerGroup group =
                 getOrCreateGroup(groupId);
 
+        GroupMember member =
+                new GroupMember(
+                        memberId,
+                        groupId,
+                        0,
+                        List.of()
+                );
+
         group.addMember(
-                memberId
+                member
         );
     }
 
@@ -194,15 +202,9 @@ public class ConsumerGroupManager {
             );
         }
 
-        /*
-         * Take a snapshot of the current members.
-         *
-         * ConsumerGroup protects its internal state,
-         * so we don't expose the original Set.
-         */
         List<String> members =
                 List.copyOf(
-                        group.members()
+                        group.members().keySet()
                 );
 
         return partitionAssigner.assign(
