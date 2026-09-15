@@ -51,6 +51,7 @@ com\buildyourownkafka\client\OffsetHandlerTest.class
 com\buildyourownkafka\client\FetchPayloadTest.class
 com\buildyourownkafka\protocol\Request.class
 com\buildyourownkafka\protocol\ResponseDecoder.class
+com\buildyourownkafka\broker\ConsumerGroupException.class
 com\buildyourownkafka\protocol\CreateTopicPayload.class
 com\buildyourownkafka\client\FetchOffsetResponsePayloadTest.class
 com\buildyourownkafka\client\ConsumerGroupStateTest.class

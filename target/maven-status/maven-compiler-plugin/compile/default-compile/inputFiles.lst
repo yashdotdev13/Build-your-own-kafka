@@ -3,6 +3,7 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Clie
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\CommitOffsetRequestHandler.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\ConsumerGroup.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\ConsumerGroupCoordinator.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\ConsumerGroupException.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\ConsumerGroupManager.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\ConsumerGroupState.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\ConsumerOffsetStore.java

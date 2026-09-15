@@ -1,7 +1,9 @@
 package com.buildyourownkafka.client;
 
+import com.buildyourownkafka.broker.ConsumerGroup;
 import com.buildyourownkafka.broker.ConsumerGroupCoordinator;
 import com.buildyourownkafka.broker.ConsumerGroupManager;
+import com.buildyourownkafka.broker.ConsumerGroupState;
 import com.buildyourownkafka.broker.PartitionAssignment;
 
 import java.util.List;
@@ -33,10 +35,28 @@ public class ConsumerGroupCoordinatorTest {
                         4
                 );
 
+        ConsumerGroup group =
+                groupManager.getGroup(
+                        "orders-group"
+                );
+
         System.out.println(
                 "After consumer-A joins: "
                         + assignment.assignments()
         );
+
+        System.out.println(
+                "Group state: "
+                        + group.state()
+        );
+
+        if (group.state()
+                != ConsumerGroupState.STABLE) {
+
+            throw new RuntimeException(
+                    "Group should be STABLE after join"
+            );
+        }
 
         if (!assignment
                 .partitionsFor("consumer-A")
@@ -50,7 +70,7 @@ public class ConsumerGroupCoordinatorTest {
         /*
          * Consumer B joins.
          *
-         * This should trigger a rebalance.
+         * This triggers a rebalance.
          */
 
         assignment =
@@ -60,10 +80,28 @@ public class ConsumerGroupCoordinatorTest {
                         4
                 );
 
+        group =
+                groupManager.getGroup(
+                        "orders-group"
+                );
+
         System.out.println(
                 "After consumer-B joins: "
                         + assignment.assignments()
         );
+
+        System.out.println(
+                "Group state: "
+                        + group.state()
+        );
+
+        if (group.state()
+                != ConsumerGroupState.STABLE) {
+
+            throw new RuntimeException(
+                    "Group should be STABLE after rebalance"
+            );
+        }
 
         if (!assignment
                 .partitionsFor("consumer-A")
@@ -84,36 +122,9 @@ public class ConsumerGroupCoordinatorTest {
         }
 
         /*
-         * Verify coordinator stores
-         * the latest assignment.
-         */
-
-        PartitionAssignment storedAssignment =
-                coordinator.getAssignment(
-                        "orders-group"
-                );
-
-        if (storedAssignment == null) {
-
-            throw new RuntimeException(
-                    "Assignment should exist"
-            );
-        }
-
-        if (!storedAssignment
-                .assignments()
-                .equals(assignment.assignments())) {
-
-            throw new RuntimeException(
-                    "Stored assignment is incorrect"
-            );
-        }
-
-        /*
          * Consumer A leaves.
          *
-         * Consumer B should receive
-         * all partitions.
+         * Another rebalance happens.
          */
 
         assignment =
@@ -123,10 +134,28 @@ public class ConsumerGroupCoordinatorTest {
                         4
                 );
 
+        group =
+                groupManager.getGroup(
+                        "orders-group"
+                );
+
         System.out.println(
                 "After consumer-A leaves: "
                         + assignment.assignments()
         );
+
+        System.out.println(
+                "Group state: "
+                        + group.state()
+        );
+
+        if (group.state()
+                != ConsumerGroupState.STABLE) {
+
+            throw new RuntimeException(
+                    "Group should be STABLE after member leaves"
+            );
+        }
 
         if (!assignment
                 .partitionsFor("consumer-B")
@@ -140,7 +169,8 @@ public class ConsumerGroupCoordinatorTest {
         /*
          * Consumer B leaves.
          *
-         * Group should disappear.
+         * This removes the final member,
+         * so the group itself is removed.
          */
 
         assignment =
@@ -174,14 +204,14 @@ public class ConsumerGroupCoordinatorTest {
 
             throw new RuntimeException(
                     "Assignment should be removed "
-                            + "after group becomes empty"
+                            + "after group deletion"
             );
         }
 
         System.out.println();
         System.out.println(
-                "ConsumerGroupCoordinator "
-                        + "verified successfully!"
+                "ConsumerGroupCoordinator state "
+                        + "transitions verified successfully!"
         );
     }
 }

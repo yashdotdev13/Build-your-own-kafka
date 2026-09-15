@@ -11,6 +11,8 @@ public class ConsumerGroup {
     private final Set<String> members =
             new HashSet<>();
 
+    private ConsumerGroupState state;
+
     public ConsumerGroup(String groupId) {
 
         if (groupId == null
@@ -22,6 +24,9 @@ public class ConsumerGroup {
         }
 
         this.groupId = groupId;
+
+        this.state =
+                ConsumerGroupState.EMPTY;
     }
 
     public synchronized void addMember(
@@ -60,9 +65,29 @@ public class ConsumerGroup {
     }
 
     public synchronized Set<String> members() {
+
         return Collections.unmodifiableSet(
                 new HashSet<>(members)
         );
+    }
+
+    public synchronized ConsumerGroupState state() {
+
+        return state;
+    }
+
+    public synchronized void setState(
+            ConsumerGroupState state
+    ) {
+
+        if (state == null) {
+
+            throw new IllegalArgumentException(
+                    "Group state cannot be null"
+            );
+        }
+
+        this.state = state;
     }
 
     private void validateMemberId(

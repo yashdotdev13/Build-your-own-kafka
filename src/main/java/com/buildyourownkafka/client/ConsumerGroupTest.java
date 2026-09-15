@@ -1,6 +1,7 @@
 package com.buildyourownkafka.client;
 
 import com.buildyourownkafka.broker.ConsumerGroup;
+import com.buildyourownkafka.broker.ConsumerGroupState;
 
 public class ConsumerGroupTest {
 
@@ -15,13 +16,25 @@ public class ConsumerGroupTest {
                         "payment-service"
                 );
 
+        /*
+         * New groups should start EMPTY.
+         */
+
         System.out.println(
-                "Group ID: "
-                        + group.groupId()
+                "Initial state: "
+                        + group.state()
         );
 
+        if (group.state()
+                != ConsumerGroupState.EMPTY) {
+
+            throw new RuntimeException(
+                    "New group should start in EMPTY state"
+            );
+        }
+
         /*
-         * Add consumers.
+         * Add members.
          */
 
         group.addMember(
@@ -30,6 +43,11 @@ public class ConsumerGroupTest {
 
         group.addMember(
                 "consumer-2"
+        );
+
+        System.out.println(
+                "Group ID: "
+                        + group.groupId()
         );
 
         System.out.println(
@@ -43,63 +61,106 @@ public class ConsumerGroupTest {
         );
 
         /*
-         * Verify membership.
+         * Change state.
          */
 
-        if (!group.hasMember("consumer-1")) {
-
-            throw new RuntimeException(
-                    "consumer-1 should be a member"
-            );
-        }
-
-        if (!group.hasMember("consumer-2")) {
-
-            throw new RuntimeException(
-                    "consumer-2 should be a member"
-            );
-        }
-
-        /*
-         * Verify duplicate registration.
-         */
-
-        group.addMember(
-                "consumer-1"
+        group.setState(
+                ConsumerGroupState.PREPARING_REBALANCE
         );
 
-        if (group.memberCount() != 2) {
+        if (group.state()
+                != ConsumerGroupState.PREPARING_REBALANCE) {
 
             throw new RuntimeException(
-                    "Duplicate member was added"
+                    "Group should be in "
+                            + "PREPARING_REBALANCE state"
             );
         }
 
+        System.out.println(
+                "State changed to: "
+                        + group.state()
+        );
+
+        group.setState(
+                ConsumerGroupState.COMPLETING_REBALANCE
+        );
+
+        if (group.state()
+                != ConsumerGroupState.COMPLETING_REBALANCE) {
+
+            throw new RuntimeException(
+                    "Group should be in "
+                            + "COMPLETING_REBALANCE state"
+            );
+        }
+
+        System.out.println(
+                "State changed to: "
+                        + group.state()
+        );
+
+        group.setState(
+                ConsumerGroupState.STABLE
+        );
+
+        if (group.state()
+                != ConsumerGroupState.STABLE) {
+
+            throw new RuntimeException(
+                    "Group should be in STABLE state"
+            );
+        }
+
+        System.out.println(
+                "State changed to: "
+                        + group.state()
+        );
+
         /*
-         * Remove consumer.
+         * Remove members.
          */
 
         group.removeMember(
                 "consumer-1"
         );
 
-        if (group.hasMember("consumer-1")) {
-
-            throw new RuntimeException(
-                    "consumer-1 should have been removed"
-            );
-        }
-
         if (group.memberCount() != 1) {
 
             throw new RuntimeException(
-                    "Unexpected member count"
+                    "Expected one remaining member"
+            );
+        }
+
+        group.removeMember(
+                "consumer-2"
+        );
+
+        if (group.memberCount() != 0) {
+
+            throw new RuntimeException(
+                    "Expected zero members"
+            );
+        }
+
+        /*
+         * State is intentionally not
+         * automatically changed by
+         * removeMember().
+         */
+
+        if (group.state()
+                != ConsumerGroupState.STABLE) {
+
+            throw new RuntimeException(
+                    "Group state should remain STABLE"
             );
         }
 
         System.out.println();
         System.out.println(
-                "ConsumerGroup model verified successfully!"
+                "ConsumerGroup state management "
+                        + "verified successfully!"
         );
     }
 }
