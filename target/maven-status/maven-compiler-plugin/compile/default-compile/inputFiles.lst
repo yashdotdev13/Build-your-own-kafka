@@ -59,6 +59,7 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\Join
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\JoinGroupTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\LeaveGroupDispatcherTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\LeaveGroupFailureTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\LeaveGroupLastMemberTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\LeaveGroupRequestHandlerTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\LeaveGroupRequestPayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\LeaveGroupResponsePayloadTest.java

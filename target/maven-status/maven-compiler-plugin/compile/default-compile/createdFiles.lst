@@ -63,6 +63,7 @@ com\buildyourownkafka\broker\BrokerServer.class
 com\buildyourownkafka\client\FetchTest.class
 com\buildyourownkafka\client\JoinGroupCoordinatorTest.class
 com\buildyourownkafka\client\ConsumerGroupTest.class
+com\buildyourownkafka\client\LeaveGroupLastMemberTest.class
 com\buildyourownkafka\broker\CommitOffsetRequestHandler.class
 com\buildyourownkafka\client\ConsumerGroupFailureDetectionIntegrationTest.class
 com\buildyourownkafka\client\PartitionTest.class
