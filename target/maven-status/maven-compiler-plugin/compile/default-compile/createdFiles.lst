@@ -63,6 +63,7 @@ com\buildyourownkafka\client\ConsumerGroupTest.class
 com\buildyourownkafka\broker\CommitOffsetRequestHandler.class
 com\buildyourownkafka\client\ConsumerGroupFailureDetectionIntegrationTest.class
 com\buildyourownkafka\client\PartitionTest.class
+com\buildyourownkafka\broker\LeaveGroupResponsePayload.class
 com\buildyourownkafka\broker\Record.class
 com\buildyourownkafka\client\SegmentRecoveryTest.class
 com\buildyourownkafka\protocol\FetchOffsetPayload.class
@@ -89,6 +90,7 @@ com\buildyourownkafka\client\ConsumerGroupFailureRemovalTest.class
 com\buildyourownkafka\client\FetchOffsetResponsePayloadTest.class
 com\buildyourownkafka\client\ConsumerGroupStateTest.class
 com\buildyourownkafka\broker\JoinGroupResult.class
+com\buildyourownkafka\client\LeaveGroupResponsePayloadTest.class
 com\buildyourownkafka\broker\PartitionLog.class
 com\buildyourownkafka\broker\LogSegment.class
 com\buildyourownkafka\protocol\RequestDecoder.class
