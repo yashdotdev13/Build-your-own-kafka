@@ -38,6 +38,7 @@ com\buildyourownkafka\client\ProduceResponsePayloadTest.class
 com\buildyourownkafka\client\SegmentRotationTest.class
 com\buildyourownkafka\broker\ConsumerGroupManager.class
 com\buildyourownkafka\broker\RequestHandler.class
+com\buildyourownkafka\client\ConsumerGroupHeartbeatTest.class
 com\buildyourownkafka\protocol\FetchPayload.class
 com\buildyourownkafka\broker\ConsumerGroup.class
 com\buildyourownkafka\broker\ProduceRequestHandler.class

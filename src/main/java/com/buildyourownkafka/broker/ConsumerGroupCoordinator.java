@@ -14,6 +14,7 @@ public class ConsumerGroupCoordinator {
         }
         this.groupManager = groupManager;
     }
+
     public synchronized PartitionAssignment joinGroup(String groupId, String memberId, int partitionCount) {
 
         validateGroupId(groupId);
@@ -28,6 +29,7 @@ public class ConsumerGroupCoordinator {
         transitionTo(groupId, ConsumerGroupState.STABLE);
         return assignment;
     }
+
     public synchronized PartitionAssignment leaveGroup(String groupId, String memberId, int partitionCount) {
 
         validateGroupId(groupId);
@@ -50,6 +52,7 @@ public class ConsumerGroupCoordinator {
         transitionTo(groupId, ConsumerGroupState.STABLE);
         return assignment;
     }
+
     public synchronized PartitionAssignment getAssignment(String groupId) {
         validateGroupId(groupId);
         return assignments.get(groupId);
@@ -68,16 +71,33 @@ public class ConsumerGroupCoordinator {
         }
         group.setState(state);
     }
+
     private void validateGroupId(String groupId) {
         if (groupId == null || groupId.isBlank()) {
             throw new IllegalArgumentException("Group ID cannot be blank");
         }
     }
+
     private void validateMemberId(String memberId) {
         if (memberId == null || memberId.isBlank()) {
             throw new IllegalArgumentException("Member ID cannot be blank");
         }
     }
+
+    public synchronized void heartbeat(String groupId, String memberId) {
+
+        validateGroupId(groupId);
+        validateMemberId(memberId);
+        ConsumerGroup group = groupManager.getGroup(groupId);
+        if (group == null) {
+            throw new ConsumerGroupException("Consumer group does not exist: " + groupId);
+        }
+        if (!group.hasMember(memberId)) {
+            throw new ConsumerGroupException("Member does not exist: " + memberId);
+        }
+        group.heartbeat(memberId, System.currentTimeMillis());
+    }
+
     private void validatePartitionCount(int partitionCount) {
         if (partitionCount <= 0) {
             throw new IllegalArgumentException("Partition count must be greater than zero");

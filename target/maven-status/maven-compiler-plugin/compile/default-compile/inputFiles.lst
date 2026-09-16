@@ -26,6 +26,7 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Topi
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\Consumer.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerCommitTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupCoordinatorTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupHeartbeatTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupManagerTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupStateTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupTest.java
