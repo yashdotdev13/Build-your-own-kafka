@@ -4,6 +4,7 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Comm
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\ConsumerGroup.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\ConsumerGroupCoordinator.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\ConsumerGroupException.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\ConsumerGroupFailureDetector.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\ConsumerGroupManager.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\ConsumerGroupState.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\ConsumerOffsetStore.java
@@ -26,6 +27,7 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Topi
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\Consumer.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerCommitTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupCoordinatorTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupFailureDetectorTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupHeartbeatTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupManagerTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupStateTest.java

@@ -6,10 +6,12 @@ com\buildyourownkafka\protocol\RequestEncoder.class
 com\buildyourownkafka\protocol\CommitOffsetPayload.class
 com\buildyourownkafka\client\PartitionLogRecoveryTest.class
 com\buildyourownkafka\broker\ConsumerGroupCoordinator.class
+com\buildyourownkafka\broker\ConsumerGroupFailureDetector.class
 com\buildyourownkafka\broker\BrokerServer.class
 com\buildyourownkafka\client\FetchTest.class
 com\buildyourownkafka\client\ConsumerGroupTest.class
 com\buildyourownkafka\broker\CommitOffsetRequestHandler.class
+com\buildyourownkafka\client\ConsumerGroupFailureDetectorTest.class
 com\buildyourownkafka\client\PartitionTest.class
 com\buildyourownkafka\broker\Record.class
 com\buildyourownkafka\client\GroupMemberTest.class
