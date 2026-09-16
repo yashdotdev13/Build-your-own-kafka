@@ -29,6 +29,7 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\Cons
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupCoordinatorTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupFailureDetectionIntegrationTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupFailureDetectorTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupFailureRemovalTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupHeartbeatTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupManagerTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupStateTest.java
