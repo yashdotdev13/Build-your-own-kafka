@@ -16,6 +16,7 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Join
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\JoinGroupRequestPayload.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\JoinGroupResponsePayload.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\JoinGroupResult.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\LeaveGroupRequestPayload.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\LogSegment.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Partition.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\PartitionAssigner.java
@@ -54,6 +55,7 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\Join
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\JoinGroupRequestHandlerTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\JoinGroupResponsePayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\JoinGroupTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\LeaveGroupRequestPayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\MultiConsumerJoinGroupTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\MultiConsumerSyncGroupTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\OffsetHandlerTest.java
