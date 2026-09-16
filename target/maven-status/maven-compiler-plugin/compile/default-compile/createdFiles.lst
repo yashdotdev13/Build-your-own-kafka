@@ -33,6 +33,7 @@ com\buildyourownkafka\broker\JoinGroupRequestPayload.class
 com\buildyourownkafka\client\Consumer.class
 com\buildyourownkafka\broker\FetchRequestHandler.class
 com\buildyourownkafka\broker\ClientConnection.class
+com\buildyourownkafka\client\JoinGroupRequestHandlerTest.class
 com\buildyourownkafka\protocol\Response.class
 com\buildyourownkafka\broker\FetchOffsetRequestHandler.class
 com\buildyourownkafka\client\ConsumerPollTest.class
@@ -46,6 +47,7 @@ com\buildyourownkafka\broker\ConsumerGroupManager.class
 com\buildyourownkafka\broker\RequestHandler.class
 com\buildyourownkafka\client\ConsumerGroupHeartbeatTest.class
 com\buildyourownkafka\protocol\FetchPayload.class
+com\buildyourownkafka\broker\JoinGroupRequestHandler.class
 com\buildyourownkafka\broker\ConsumerGroup.class
 com\buildyourownkafka\broker\ProduceRequestHandler.class
 com\buildyourownkafka\protocol\FetchOffsetResponsePayload.class
