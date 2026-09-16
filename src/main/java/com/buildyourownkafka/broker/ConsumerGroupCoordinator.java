@@ -13,6 +13,7 @@ public class ConsumerGroupCoordinator {
     public ConsumerGroupCoordinator(ConsumerGroupManager groupManager) {
         this(groupManager, 10_000);
     }
+
     public ConsumerGroupCoordinator(ConsumerGroupManager groupManager, long sessionTimeoutMillis) {
 
         if (groupManager == null) {
@@ -37,6 +38,7 @@ public class ConsumerGroupCoordinator {
         GroupMember member = group.getMember(memberId);
         return new JoinGroupResult(memberId, member.generation(), assignment.partitionsFor(memberId));
     }
+
     public synchronized PartitionAssignment leaveGroup(String groupId, String memberId, int partitionCount) {
 
         validateGroupId(groupId);
@@ -58,6 +60,7 @@ public class ConsumerGroupCoordinator {
         transitionTo(groupId, ConsumerGroupState.STABLE);
         return assignment;
     }
+
     public synchronized PartitionAssignment getAssignment(String groupId) {
         validateGroupId(groupId);
         return assignments.get(groupId);
@@ -77,6 +80,7 @@ public class ConsumerGroupCoordinator {
         }
         group.heartbeat(memberId, System.currentTimeMillis());
     }
+
     public synchronized List<String> findExpiredMembers(String groupId, long currentTimeMillis) {
         validateGroupId(groupId);
         if (currentTimeMillis < 0) {
@@ -88,8 +92,8 @@ public class ConsumerGroupCoordinator {
         }
         return group.members().values().stream().filter(member -> failureDetector.isExpired(member, currentTimeMillis)).map(GroupMember::memberId).sorted().toList();
     }
-    public synchronized PartitionAssignment removeExpiredMembers(String groupId, int partitionCount,
-                                                                 long currentTimeMillis) {
+
+    public synchronized PartitionAssignment removeExpiredMembers(String groupId, int partitionCount, long currentTimeMillis) {
 
         validateGroupId(groupId);
         validatePartitionCount(partitionCount);
@@ -120,11 +124,13 @@ public class ConsumerGroupCoordinator {
         transitionTo(groupId, ConsumerGroupState.STABLE);
         return assignment;
     }
+
     private PartitionAssignment rebalance(String groupId, int partitionCount) {
         PartitionAssignment assignment = groupManager.assignPartitions(groupId, partitionCount);
         assignments.put(groupId, assignment);
         return assignment;
     }
+
     private void transitionTo(String groupId, ConsumerGroupState state) {
         ConsumerGroup group = groupManager.getGroup(groupId);
         if (group == null) {
@@ -132,16 +138,42 @@ public class ConsumerGroupCoordinator {
         }
         group.setState(state);
     }
+
+    public synchronized JoinGroupResult syncGroup(String groupId, String memberId, int generation) {
+        validateGroupId(groupId);
+        validateMemberId(memberId);
+
+        if (generation < 0) {
+            throw new IllegalArgumentException("Generation cannot be negative");
+        }
+        ConsumerGroup group = groupManager.getGroup(groupId);
+        if (group == null) {
+            throw new ConsumerGroupException("Consumer group does not exist: " + groupId);
+        }
+        GroupMember member = group.getMember(memberId);
+        if (member == null) {
+            throw new ConsumerGroupException("Member does not exist: " + memberId);
+        }
+        PartitionAssignment assignment = assignments.get(groupId);
+        if (assignment == null) {
+            throw new ConsumerGroupException("No partition assignment exists for group: " + groupId);
+        }
+        List<Integer> partitions = assignment.partitionsFor(memberId);
+        return new JoinGroupResult(memberId, member.generation(), partitions);
+    }
+
     private void validateGroupId(String groupId) {
         if (groupId == null || groupId.isBlank()) {
             throw new IllegalArgumentException("Group ID cannot be blank");
         }
     }
+
     private void validateMemberId(String memberId) {
         if (memberId == null || memberId.isBlank()) {
             throw new IllegalArgumentException("Member ID cannot be blank");
         }
     }
+
     private void validatePartitionCount(int partitionCount) {
         if (partitionCount <= 0) {
             throw new IllegalArgumentException("Partition count must be greater than zero");

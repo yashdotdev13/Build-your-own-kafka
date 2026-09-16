@@ -26,6 +26,7 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Prod
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Record.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\RequestDispatcher.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\RequestHandler.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\SyncGroupRequestHandler.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\SyncGroupRequestPayload.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\SyncGroupResponsePayload.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Topic.java
@@ -54,6 +55,7 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\Join
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\JoinGroupResponsePayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\JoinGroupTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\MultiConsumerJoinGroupTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\MultiConsumerSyncGroupTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\OffsetHandlerTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\OffsetPayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\PartitionAssignerTest.java
@@ -69,8 +71,12 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\Reco
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\RecoveryProduceTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\SegmentRecoveryTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\SegmentRotationTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\SyncGroupCoordinatorTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\SyncGroupDispatcherTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\SyncGroupRequestHandlerTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\SyncGroupRequestPayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\SyncGroupResponsePayloadTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\SyncGroupTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\TestClient.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\TopicTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\Main.java
