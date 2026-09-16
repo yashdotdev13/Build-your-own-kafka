@@ -26,15 +26,12 @@ public class ConsumerGroupTest {
         if (!group.hasMember("consumer-1")) {
             throw new RuntimeException("consumer-1 should exist");
         }
-
         if (group.memberCount() != 2) {
             throw new RuntimeException("Expected 2 members");
         }
-
         if (retrieved.generation() != 1) {
             throw new RuntimeException("Incorrect generation");
         }
-
         if (!retrieved.assignedPartitions().equals(List.of(0, 2))) {
             throw new RuntimeException("Incorrect partition assignment");
         }
@@ -46,6 +43,24 @@ public class ConsumerGroupTest {
         }
         if (!retrieved.assignedPartitions().equals(List.of(1, 3))) {
             throw new RuntimeException("Partitions should be updated");
+        }
+        System.out.println("Consumer-1 updated generation: " + retrieved.generation());
+        System.out.println("Consumer-1 updated partitions: " + retrieved.assignedPartitions());
+        long previousHeartbeat = retrieved.lastHeartbeat();
+        long heartbeatTime = previousHeartbeat + 1000;
+        group.heartbeat("consumer-1", heartbeatTime);
+
+        retrieved = group.getMember("consumer-1");
+        System.out.println("Consumer-1 heartbeat: " + retrieved.lastHeartbeat());
+
+        if (retrieved.lastHeartbeat() != heartbeatTime) {
+            throw new RuntimeException("Heartbeat timestamp was not updated");
+        }
+        if (retrieved.generation() != 2) {
+            throw new RuntimeException("Heartbeat should not change generation");
+        }
+        if (!retrieved.assignedPartitions().equals(List.of(1, 3))) {
+            throw new RuntimeException("Heartbeat should not change partitions");
         }
         group.setState(ConsumerGroupState.PREPARING_REBALANCE);
         System.out.println("State changed to: " + group.state());
@@ -61,6 +76,6 @@ public class ConsumerGroupTest {
             throw new RuntimeException("consumer-2 should be removed");
         }
         System.out.println();
-        System.out.println("ConsumerGroup member metadata " + "lifecycle verified successfully!");
+        System.out.println("ConsumerGroup member metadata " + "and heartbeat lifecycle " + "verified successfully!");
     }
 }
