@@ -14,4 +14,5 @@ public record Request(
     public static final int COMMIT_OFFSET = 5;
     public static final int FETCH_OFFSET = 6;
     public static final int JOIN_GROUP = 7;
+    public static final int SYNC_GROUP = 8;
 }

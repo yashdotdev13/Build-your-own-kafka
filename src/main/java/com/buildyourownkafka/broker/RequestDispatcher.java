@@ -19,6 +19,10 @@ public class RequestDispatcher {
         register(Request.COMMIT_OFFSET, new CommitOffsetRequestHandler(consumerOffsetStore));
         register(Request.FETCH_OFFSET, new FetchOffsetRequestHandler(consumerOffsetStore));
         register(Request.JOIN_GROUP, new JoinGroupRequestHandler(consumerGroupCoordinator));
+        register(
+                Request.SYNC_GROUP,
+                new SyncGroupRequestHandler(consumerGroupCoordinator)
+        );
     }
 
     private void register(int requestType, RequestHandler handler) {
