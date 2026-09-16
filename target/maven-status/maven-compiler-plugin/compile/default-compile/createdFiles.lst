@@ -1,4 +1,5 @@
 com\buildyourownkafka\broker\ConsumerOffsetStore.class
+com\buildyourownkafka\client\JoinGroupTest.class
 com\buildyourownkafka\protocol\Frame.class
 com\buildyourownkafka\broker\CreateTopicRequestHandler.class
 com\buildyourownkafka\broker\PartitionAssigner.class
@@ -9,6 +10,7 @@ com\buildyourownkafka\broker\ConsumerGroupCoordinator.class
 com\buildyourownkafka\broker\ConsumerGroupFailureDetector.class
 com\buildyourownkafka\broker\BrokerServer.class
 com\buildyourownkafka\client\FetchTest.class
+com\buildyourownkafka\client\JoinGroupCoordinatorTest.class
 com\buildyourownkafka\client\ConsumerGroupTest.class
 com\buildyourownkafka\broker\CommitOffsetRequestHandler.class
 com\buildyourownkafka\client\ConsumerGroupFailureDetectionIntegrationTest.class
@@ -26,10 +28,13 @@ com\buildyourownkafka\Main.class
 com\buildyourownkafka\client\FetchResponsePayloadTest.class
 com\buildyourownkafka\protocol\FrameEncoder.class
 com\buildyourownkafka\broker\ConsumerGroupState.class
+com\buildyourownkafka\client\JoinGroupPayloadTest.class
 com\buildyourownkafka\client\OffsetPayloadTest.class
+com\buildyourownkafka\broker\JoinGroupRequestPayload.class
 com\buildyourownkafka\client\Consumer.class
 com\buildyourownkafka\broker\FetchRequestHandler.class
 com\buildyourownkafka\broker\ClientConnection.class
+com\buildyourownkafka\client\JoinGroupRequestHandlerTest.class
 com\buildyourownkafka\protocol\Response.class
 com\buildyourownkafka\broker\FetchOffsetRequestHandler.class
 com\buildyourownkafka\client\ConsumerPollTest.class
@@ -43,6 +48,7 @@ com\buildyourownkafka\broker\ConsumerGroupManager.class
 com\buildyourownkafka\broker\RequestHandler.class
 com\buildyourownkafka\client\ConsumerGroupHeartbeatTest.class
 com\buildyourownkafka\protocol\FetchPayload.class
+com\buildyourownkafka\broker\JoinGroupRequestHandler.class
 com\buildyourownkafka\broker\ConsumerGroup.class
 com\buildyourownkafka\broker\ProduceRequestHandler.class
 com\buildyourownkafka\protocol\FetchOffsetResponsePayload.class
@@ -61,11 +67,14 @@ com\buildyourownkafka\broker\ConsumerGroupException.class
 com\buildyourownkafka\protocol\CreateTopicPayload.class
 com\buildyourownkafka\client\ConsumerGroupFailureRemovalTest.class
 com\buildyourownkafka\client\FetchOffsetResponsePayloadTest.class
+com\buildyourownkafka\client\MultiConsumerJoinGroupTest.class
 com\buildyourownkafka\client\ConsumerGroupStateTest.class
 com\buildyourownkafka\client\ProduceTest.class
+com\buildyourownkafka\broker\JoinGroupResult.class
 com\buildyourownkafka\protocol\ProducePayload.class
 com\buildyourownkafka\broker\PartitionLog.class
 com\buildyourownkafka\broker\LogSegment.class
+com\buildyourownkafka\client\JoinGroupResponsePayloadTest.class
 com\buildyourownkafka\protocol\RequestDecoder.class
 com\buildyourownkafka\broker\PingRequestHandler.class
 com\buildyourownkafka\broker\PartitionAssignment.class
@@ -78,3 +87,4 @@ com\buildyourownkafka\broker\ConsumerOffsetStore$OffsetKey.class
 com\buildyourownkafka\client\PartitionLogTest.class
 com\buildyourownkafka\broker\TopicManager.class
 com\buildyourownkafka\protocol\ResponseEncoder.class
+com\buildyourownkafka\broker\JoinGroupResponsePayload.class

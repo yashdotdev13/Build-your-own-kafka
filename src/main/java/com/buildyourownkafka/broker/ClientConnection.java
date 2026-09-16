@@ -15,21 +15,24 @@ public class ClientConnection {
     private final Socket socket;
     private final TopicManager topicManager;
     private final ConsumerOffsetStore consumerOffsetStore;
+    private final ConsumerGroupCoordinator consumerGroupCoordinator;
 
-    public ClientConnection(Socket socket, TopicManager topicManager,
-                            ConsumerOffsetStore consumerOffsetStore) {
+    public ClientConnection(Socket socket, TopicManager topicManager, ConsumerOffsetStore consumerOffsetStore,
+                            ConsumerGroupCoordinator consumerGroupCoordinator) {
 
         this.socket = socket;
         this.topicManager = topicManager;
         this.consumerOffsetStore = consumerOffsetStore;
+        this.consumerGroupCoordinator = consumerGroupCoordinator;
     }
 
     public void handle() throws IOException {
+
         DataInputStream input = new DataInputStream(socket.getInputStream());
         DataOutputStream output = new DataOutputStream(socket.getOutputStream());
         RequestDecoder requestDecoder = new RequestDecoder(input);
         ResponseEncoder responseEncoder = new ResponseEncoder(output);
-        RequestDispatcher dispatcher = new RequestDispatcher(topicManager, consumerOffsetStore);
+        RequestDispatcher dispatcher = new RequestDispatcher(topicManager, consumerOffsetStore, consumerGroupCoordinator);
 
         while (true) {
             Request request = requestDecoder.decode();
