@@ -23,6 +23,10 @@ public class RequestDispatcher {
                 Request.SYNC_GROUP,
                 new SyncGroupRequestHandler(consumerGroupCoordinator)
         );
+        register(
+                Request.LEAVE_GROUP,
+                new LeaveGroupRequestHandler(consumerGroupCoordinator)
+        );
     }
 
     private void register(int requestType, RequestHandler handler) {
