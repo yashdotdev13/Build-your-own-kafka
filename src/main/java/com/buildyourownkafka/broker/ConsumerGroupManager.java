@@ -15,17 +15,21 @@ public class ConsumerGroupManager {
     public ConsumerGroupManager() {
         this.partitionAssigner = new PartitionAssigner();
     }
+
     public ConsumerGroup getOrCreateGroup(String groupId) {
+
         validateGroupId(groupId);
         return groups.computeIfAbsent(groupId, ConsumerGroup::new);
     }
 
     public ConsumerGroup getGroup(String groupId) {
+
         validateGroupId(groupId);
         return groups.get(groupId);
     }
 
     public boolean groupExists(String groupId) {
+
         validateGroupId(groupId);
         return groups.containsKey(groupId);
     }
@@ -38,23 +42,30 @@ public class ConsumerGroupManager {
         if (group == null) {
             return false;
         }
-
         if (group.memberCount() > 0) {
             throw new IllegalStateException("Cannot remove consumer group with active members");
         }
+
         return groups.remove(groupId, group);
     }
+
     public void addMember(String groupId, String memberId) {
 
         ConsumerGroup group = getOrCreateGroup(groupId);
         GroupMember member = new GroupMember(memberId, groupId, 0, List.of());
         group.addMember(member);
     }
+
     public void removeMember(String groupId, String memberId) {
 
         ConsumerGroup group = getGroup(groupId);
+
         if (group == null) {
-            throw new IllegalArgumentException("Consumer group does not exist: " + groupId);
+            throw new ConsumerGroupException("Consumer group does not exist: " + groupId);
+        }
+
+        if (!group.hasMember(memberId)) {
+            throw new ConsumerGroupException("Member does not exist: " + memberId);
         }
 
         group.removeMember(memberId);
@@ -63,17 +74,21 @@ public class ConsumerGroupManager {
         }
     }
     public PartitionAssignment assignPartitions(String groupId, int partitionCount) {
+
         ConsumerGroup group = getGroup(groupId);
 
         if (group == null) {
             throw new IllegalArgumentException("Consumer group does not exist: " + groupId);
         }
+
         List<String> members = List.copyOf(group.members().keySet());
         return partitionAssigner.assign(members, partitionCount);
     }
+
     public Collection<ConsumerGroup> getAllGroups() {
         return Collections.unmodifiableCollection(groups.values());
     }
+
     public int groupCount() {
         return groups.size();
     }
