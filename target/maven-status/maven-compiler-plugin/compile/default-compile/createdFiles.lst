@@ -26,7 +26,9 @@ com\buildyourownkafka\Main.class
 com\buildyourownkafka\client\FetchResponsePayloadTest.class
 com\buildyourownkafka\protocol\FrameEncoder.class
 com\buildyourownkafka\broker\ConsumerGroupState.class
+com\buildyourownkafka\client\JoinGroupPayloadTest.class
 com\buildyourownkafka\client\OffsetPayloadTest.class
+com\buildyourownkafka\broker\JoinGroupRequestPayload.class
 com\buildyourownkafka\client\Consumer.class
 com\buildyourownkafka\broker\FetchRequestHandler.class
 com\buildyourownkafka\broker\ClientConnection.class
