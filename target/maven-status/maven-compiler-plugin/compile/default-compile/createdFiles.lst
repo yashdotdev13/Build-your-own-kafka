@@ -28,6 +28,7 @@ com\buildyourownkafka\Main.class
 com\buildyourownkafka\client\FetchResponsePayloadTest.class
 com\buildyourownkafka\protocol\FrameEncoder.class
 com\buildyourownkafka\client\SyncGroupRequestPayloadTest.class
+com\buildyourownkafka\client\SyncGroupResponsePayloadTest.class
 com\buildyourownkafka\broker\ConsumerGroupState.class
 com\buildyourownkafka\client\JoinGroupPayloadTest.class
 com\buildyourownkafka\client\OffsetPayloadTest.class
@@ -88,5 +89,6 @@ com\buildyourownkafka\client\TopicTest.class
 com\buildyourownkafka\broker\ConsumerOffsetStore$OffsetKey.class
 com\buildyourownkafka\client\PartitionLogTest.class
 com\buildyourownkafka\broker\TopicManager.class
+com\buildyourownkafka\broker\SyncGroupResponsePayload.class
 com\buildyourownkafka\protocol\ResponseEncoder.class
 com\buildyourownkafka\broker\JoinGroupResponsePayload.class

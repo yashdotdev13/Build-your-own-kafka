@@ -27,6 +27,7 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Reco
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\RequestDispatcher.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\RequestHandler.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\SyncGroupRequestPayload.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\SyncGroupResponsePayload.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Topic.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\TopicManager.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\Consumer.java
@@ -69,6 +70,7 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\Reco
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\SegmentRecoveryTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\SegmentRotationTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\SyncGroupRequestPayloadTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\SyncGroupResponsePayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\TestClient.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\TopicTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\Main.java
