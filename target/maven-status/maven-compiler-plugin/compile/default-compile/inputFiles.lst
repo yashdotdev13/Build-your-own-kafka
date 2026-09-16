@@ -50,6 +50,8 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\Join
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\JoinGroupPayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\JoinGroupRequestHandlerTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\JoinGroupResponsePayloadTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\JoinGroupTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\MultiConsumerJoinGroupTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\OffsetHandlerTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\OffsetPayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\PartitionAssignerTest.java

@@ -10,17 +10,21 @@ public class RequestDispatcher {
 
     private final Map<Integer, RequestHandler> handlers = new HashMap<>();
 
-    public RequestDispatcher(TopicManager topicManager, ConsumerOffsetStore consumerOffsetStore) {
+    public RequestDispatcher(TopicManager topicManager, ConsumerOffsetStore consumerOffsetStore, ConsumerGroupCoordinator consumerGroupCoordinator) {
+
         register(Request.PING, new PingRequestHandler());
         register(Request.CREATE_TOPIC, new CreateTopicRequestHandler(topicManager));
         register(Request.PRODUCE, new ProduceRequestHandler(topicManager));
         register(Request.FETCH, new FetchRequestHandler(topicManager));
         register(Request.COMMIT_OFFSET, new CommitOffsetRequestHandler(consumerOffsetStore));
         register(Request.FETCH_OFFSET, new FetchOffsetRequestHandler(consumerOffsetStore));
+        register(Request.JOIN_GROUP, new JoinGroupRequestHandler(consumerGroupCoordinator));
     }
+
     private void register(int requestType, RequestHandler handler) {
         handlers.put(requestType, handler);
     }
+
     public Response dispatch(Request request) {
         RequestHandler handler = handlers.get(request.type());
         if (handler == null) {
