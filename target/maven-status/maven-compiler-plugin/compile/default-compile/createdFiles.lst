@@ -13,6 +13,7 @@ com\buildyourownkafka\client\RecoveryProduceTest.class
 com\buildyourownkafka\Main.class
 com\buildyourownkafka\protocol\FrameEncoder.class
 com\buildyourownkafka\client\LeaveGroupTest.class
+com\buildyourownkafka\broker\InvalidGenerationException.class
 com\buildyourownkafka\client\SyncGroupRequestPayloadTest.class
 com\buildyourownkafka\client\SyncGroupCoordinatorTest.class
 com\buildyourownkafka\broker\ConsumerGroupState.class
@@ -71,6 +72,7 @@ com\buildyourownkafka\broker\LeaveGroupResponsePayload.class
 com\buildyourownkafka\broker\Record.class
 com\buildyourownkafka\client\SegmentRecoveryTest.class
 com\buildyourownkafka\protocol\FetchOffsetPayload.class
+com\buildyourownkafka\client\ConsumerGroupGenerationTest.class
 com\buildyourownkafka\client\FetchResponsePayloadTest.class
 com\buildyourownkafka\client\SyncGroupResponsePayloadTest.class
 com\buildyourownkafka\client\LeaveGroupRequestHandlerTest.class

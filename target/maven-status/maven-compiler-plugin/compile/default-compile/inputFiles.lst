@@ -12,6 +12,7 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Crea
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\FetchOffsetRequestHandler.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\FetchRequestHandler.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\GroupMember.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\InvalidGenerationException.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\JoinGroupRequestHandler.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\JoinGroupRequestPayload.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\JoinGroupResponsePayload.java
@@ -40,6 +41,7 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\Cons
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupFailureDetectionIntegrationTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupFailureDetectorTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupFailureRemovalTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupGenerationTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupHeartbeatTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupManagerTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupStateTest.java
