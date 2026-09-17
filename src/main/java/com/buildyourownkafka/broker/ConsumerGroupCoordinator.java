@@ -125,9 +125,61 @@ public class ConsumerGroupCoordinator {
         return assignment;
     }
 
-    private PartitionAssignment rebalance(String groupId, int partitionCount) {
-        PartitionAssignment assignment = groupManager.assignPartitions(groupId, partitionCount);
-        assignments.put(groupId, assignment);
+    private PartitionAssignment rebalance(
+            String groupId,
+            int partitionCount
+    ) {
+        ConsumerGroup group =
+                groupManager.getGroup(groupId);
+
+        if (group == null) {
+            throw new ConsumerGroupException(
+                    "Consumer group does not exist: "
+                            + groupId
+            );
+        }
+
+        /*
+         * Every rebalance creates a new generation.
+         */
+
+        int generation =
+                group.incrementGeneration();
+
+        /*
+         * Calculate the new partition assignment.
+         */
+
+        PartitionAssignment assignment =
+                groupManager.assignPartitions(
+                        groupId,
+                        partitionCount
+                );
+
+        /*
+         * Update every member with the
+         * new generation and assignment.
+         */
+
+        for (Map.Entry<String, java.util.List<Integer>> entry
+                : assignment.assignments().entrySet()) {
+
+            group.updateMemberAssignment(
+                    entry.getKey(),
+                    generation,
+                    entry.getValue()
+            );
+        }
+
+        /*
+         * Store the latest assignment.
+         */
+
+        assignments.put(
+                groupId,
+                assignment
+        );
+
         return assignment;
     }
 

@@ -58,6 +58,7 @@ com\buildyourownkafka\client\JoinGroupTest.class
 com\buildyourownkafka\broker\PartitionAssigner.class
 com\buildyourownkafka\client\LeaveGroupFailureTest.class
 com\buildyourownkafka\protocol\CommitOffsetPayload.class
+com\buildyourownkafka\client\GenerationRebalanceTest.class
 com\buildyourownkafka\client\SyncGroupDispatcherTest.class
 com\buildyourownkafka\broker\ConsumerGroupCoordinator.class
 com\buildyourownkafka\broker\BrokerServer.class
