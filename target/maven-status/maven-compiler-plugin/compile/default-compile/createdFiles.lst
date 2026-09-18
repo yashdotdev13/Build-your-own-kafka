@@ -89,6 +89,7 @@ com\buildyourownkafka\broker\FetchOffsetRequestHandler.class
 com\buildyourownkafka\client\ConsumerGroupManagerTest.class
 com\buildyourownkafka\client\TestClient.class
 com\buildyourownkafka\client\SegmentRotationTest.class
+com\buildyourownkafka\client\ConsumerJoinGroupTest.class
 com\buildyourownkafka\client\ConsumerGroupHeartbeatTest.class
 com\buildyourownkafka\broker\JoinGroupRequestHandler.class
 com\buildyourownkafka\client\LeaveGroupDispatcherTest.class
