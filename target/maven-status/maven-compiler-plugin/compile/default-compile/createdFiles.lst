@@ -21,6 +21,7 @@ com\buildyourownkafka\client\JoinGroupPayloadTest.class
 com\buildyourownkafka\broker\JoinGroupRequestPayload.class
 com\buildyourownkafka\broker\FetchRequestHandler.class
 com\buildyourownkafka\client\JoinGroupRequestHandlerTest.class
+com\buildyourownkafka\client\ConsumerGroupRejoinTest.class
 com\buildyourownkafka\client\ConsumerPollTest.class
 com\buildyourownkafka\protocol\FetchResponsePayload.class
 com\buildyourownkafka\protocol\FrameDecoder.class
