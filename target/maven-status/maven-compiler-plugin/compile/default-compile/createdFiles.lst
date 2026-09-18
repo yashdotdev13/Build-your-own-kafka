@@ -71,6 +71,7 @@ com\buildyourownkafka\client\ConsumerGroupFailureDetectionIntegrationTest.class
 com\buildyourownkafka\client\PartitionTest.class
 com\buildyourownkafka\broker\LeaveGroupResponsePayload.class
 com\buildyourownkafka\broker\Record.class
+com\buildyourownkafka\client\SyncGroupGenerationValidationTest.class
 com\buildyourownkafka\client\SegmentRecoveryTest.class
 com\buildyourownkafka\protocol\FetchOffsetPayload.class
 com\buildyourownkafka\client\ConsumerGroupGenerationTest.class

@@ -7,121 +7,380 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ConsumerGroupCoordinator {
 
     private final ConsumerGroupManager groupManager;
-    private final Map<String, PartitionAssignment> assignments = new ConcurrentHashMap<>();
+
+    private final Map<String, PartitionAssignment> assignments =
+            new ConcurrentHashMap<>();
+
     private final ConsumerGroupFailureDetector failureDetector;
 
-    public ConsumerGroupCoordinator(ConsumerGroupManager groupManager) {
-        this(groupManager, 10_000);
+    public ConsumerGroupCoordinator(
+            ConsumerGroupManager groupManager
+    ) {
+        this(
+                groupManager,
+                10_000
+        );
     }
 
-    public ConsumerGroupCoordinator(ConsumerGroupManager groupManager, long sessionTimeoutMillis) {
-
+    public ConsumerGroupCoordinator(
+            ConsumerGroupManager groupManager,
+            long sessionTimeoutMillis
+    ) {
         if (groupManager == null) {
-            throw new IllegalArgumentException("Consumer group manager cannot be null");
+            throw new IllegalArgumentException(
+                    "Consumer group manager cannot be null"
+            );
         }
+
         this.groupManager = groupManager;
-        this.failureDetector = new ConsumerGroupFailureDetector(sessionTimeoutMillis);
+
+        this.failureDetector =
+                new ConsumerGroupFailureDetector(
+                        sessionTimeoutMillis
+                );
     }
 
-    public synchronized JoinGroupResult joinGroup(String groupId, String memberId, int partitionCount) {
+    public synchronized JoinGroupResult joinGroup(
+            String groupId,
+            String memberId,
+            int partitionCount
+    ) {
 
         validateGroupId(groupId);
         validateMemberId(memberId);
         validatePartitionCount(partitionCount);
+
         groupManager.getOrCreateGroup(groupId);
-        transitionTo(groupId, ConsumerGroupState.PREPARING_REBALANCE);
-        groupManager.addMember(groupId, memberId);
-        transitionTo(groupId, ConsumerGroupState.COMPLETING_REBALANCE);
-        PartitionAssignment assignment = rebalance(groupId, partitionCount);
-        transitionTo(groupId, ConsumerGroupState.STABLE);
-        ConsumerGroup group = groupManager.getGroup(groupId);
-        GroupMember member = group.getMember(memberId);
-        return new JoinGroupResult(memberId, member.generation(), assignment.partitionsFor(memberId));
+
+        transitionTo(
+                groupId,
+                ConsumerGroupState.PREPARING_REBALANCE
+        );
+
+        groupManager.addMember(
+                groupId,
+                memberId
+        );
+
+        transitionTo(
+                groupId,
+                ConsumerGroupState.COMPLETING_REBALANCE
+        );
+
+        PartitionAssignment assignment =
+                rebalance(
+                        groupId,
+                        partitionCount
+                );
+
+        transitionTo(
+                groupId,
+                ConsumerGroupState.STABLE
+        );
+
+        ConsumerGroup group =
+                groupManager.getGroup(groupId);
+
+        GroupMember member =
+                group.getMember(memberId);
+
+        return new JoinGroupResult(
+                memberId,
+                member.generation(),
+                assignment.partitionsFor(memberId)
+        );
     }
 
-    public synchronized PartitionAssignment leaveGroup(String groupId, String memberId, int partitionCount) {
+    public synchronized PartitionAssignment leaveGroup(
+            String groupId,
+            String memberId,
+            int partitionCount
+    ) {
 
         validateGroupId(groupId);
         validateMemberId(memberId);
         validatePartitionCount(partitionCount);
 
         if (!groupManager.groupExists(groupId)) {
-            throw new ConsumerGroupException("Consumer group does not exist: " + groupId);
+
+            throw new ConsumerGroupException(
+                    "Consumer group does not exist: "
+                            + groupId
+            );
         }
 
-        transitionTo(groupId, ConsumerGroupState.PREPARING_REBALANCE);
-        groupManager.removeMember(groupId, memberId);
+        transitionTo(
+                groupId,
+                ConsumerGroupState.PREPARING_REBALANCE
+        );
+
+        groupManager.removeMember(
+                groupId,
+                memberId
+        );
+
+        /*
+         * The last member leaving removes the
+         * consumer group completely.
+         */
+
         if (!groupManager.groupExists(groupId)) {
+
             assignments.remove(groupId);
+
             return null;
         }
-        transitionTo(groupId, ConsumerGroupState.COMPLETING_REBALANCE);
-        PartitionAssignment assignment = rebalance(groupId, partitionCount);
-        transitionTo(groupId, ConsumerGroupState.STABLE);
+
+        transitionTo(
+                groupId,
+                ConsumerGroupState.COMPLETING_REBALANCE
+        );
+
+        PartitionAssignment assignment =
+                rebalance(
+                        groupId,
+                        partitionCount
+                );
+
+        transitionTo(
+                groupId,
+                ConsumerGroupState.STABLE
+        );
+
         return assignment;
     }
 
-    public synchronized PartitionAssignment getAssignment(String groupId) {
-        validateGroupId(groupId);
-        return assignments.get(groupId);
-    }
-
-    public synchronized void heartbeat(String groupId, String memberId) {
+    public synchronized JoinGroupResult syncGroup(
+            String groupId,
+            String memberId,
+            int generation
+    ) {
 
         validateGroupId(groupId);
         validateMemberId(memberId);
 
-        ConsumerGroup group = groupManager.getGroup(groupId);
+        if (generation < 0) {
+
+            throw new IllegalArgumentException(
+                    "Generation cannot be negative"
+            );
+        }
+
+        ConsumerGroup group =
+                groupManager.getGroup(groupId);
+
         if (group == null) {
-            throw new ConsumerGroupException("Consumer group does not exist: " + groupId);
+
+            throw new ConsumerGroupException(
+                    "Consumer group does not exist: "
+                            + groupId
+            );
         }
-        if (!group.hasMember(memberId)) {
-            throw new ConsumerGroupException("Member does not exist: " + memberId);
+
+        GroupMember member =
+                group.getMember(memberId);
+
+        if (member == null) {
+
+            throw new ConsumerGroupException(
+                    "Member does not exist: "
+                            + memberId
+            );
         }
-        group.heartbeat(memberId, System.currentTimeMillis());
+
+        /*
+         * The group owns the authoritative generation.
+         *
+         * A consumer using an older generation is stale
+         * and must not synchronize.
+         */
+
+        if (generation != group.generation()) {
+
+            throw new InvalidGenerationException(
+                    "Invalid generation. Expected: "
+                            + group.generation()
+                            + ", received: "
+                            + generation
+            );
+        }
+
+        PartitionAssignment assignment =
+                assignments.get(groupId);
+
+        if (assignment == null) {
+
+            throw new ConsumerGroupException(
+                    "No partition assignment exists for group: "
+                            + groupId
+            );
+        }
+
+        List<Integer> partitions =
+                assignment.partitionsFor(memberId);
+
+        return new JoinGroupResult(
+                memberId,
+                member.generation(),
+                partitions
+        );
     }
 
-    public synchronized List<String> findExpiredMembers(String groupId, long currentTimeMillis) {
+    public synchronized PartitionAssignment getAssignment(
+            String groupId
+    ) {
+
         validateGroupId(groupId);
-        if (currentTimeMillis < 0) {
-            throw new IllegalArgumentException("Current time cannot be negative");
-        }
-        ConsumerGroup group = groupManager.getGroup(groupId);
-        if (group == null) {
-            throw new ConsumerGroupException("Consumer group does not exist: " + groupId);
-        }
-        return group.members().values().stream().filter(member -> failureDetector.isExpired(member, currentTimeMillis)).map(GroupMember::memberId).sorted().toList();
+
+        return assignments.get(groupId);
     }
 
-    public synchronized PartitionAssignment removeExpiredMembers(String groupId, int partitionCount, long currentTimeMillis) {
+    public synchronized void heartbeat(
+            String groupId,
+            String memberId
+    ) {
+
+        validateGroupId(groupId);
+        validateMemberId(memberId);
+
+        ConsumerGroup group =
+                groupManager.getGroup(groupId);
+
+        if (group == null) {
+
+            throw new ConsumerGroupException(
+                    "Consumer group does not exist: "
+                            + groupId
+            );
+        }
+
+        if (!group.hasMember(memberId)) {
+
+            throw new ConsumerGroupException(
+                    "Member does not exist: "
+                            + memberId
+            );
+        }
+
+        group.heartbeat(
+                memberId,
+                System.currentTimeMillis()
+        );
+    }
+
+    public synchronized List<String> findExpiredMembers(
+            String groupId,
+            long currentTimeMillis
+    ) {
+
+        validateGroupId(groupId);
+
+        if (currentTimeMillis < 0) {
+
+            throw new IllegalArgumentException(
+                    "Current time cannot be negative"
+            );
+        }
+
+        ConsumerGroup group =
+                groupManager.getGroup(groupId);
+
+        if (group == null) {
+
+            throw new ConsumerGroupException(
+                    "Consumer group does not exist: "
+                            + groupId
+            );
+        }
+
+        return group.members()
+                .values()
+                .stream()
+                .filter(member ->
+                        failureDetector.isExpired(
+                                member,
+                                currentTimeMillis
+                        )
+                )
+                .map(GroupMember::memberId)
+                .sorted()
+                .toList();
+    }
+
+    public synchronized PartitionAssignment removeExpiredMembers(
+            String groupId,
+            int partitionCount,
+            long currentTimeMillis
+    ) {
 
         validateGroupId(groupId);
         validatePartitionCount(partitionCount);
 
         if (currentTimeMillis < 0) {
-            throw new IllegalArgumentException("Current time cannot be negative");
+
+            throw new IllegalArgumentException(
+                    "Current time cannot be negative"
+            );
         }
-        ConsumerGroup group = groupManager.getGroup(groupId);
+
+        ConsumerGroup group =
+                groupManager.getGroup(groupId);
+
         if (group == null) {
-            throw new ConsumerGroupException("Consumer group does not exist: " + groupId);
+
+            throw new ConsumerGroupException(
+                    "Consumer group does not exist: "
+                            + groupId
+            );
         }
-        List<String> expiredMembers = findExpiredMembers(groupId, currentTimeMillis);
+
+        List<String> expiredMembers =
+                findExpiredMembers(
+                        groupId,
+                        currentTimeMillis
+                );
+
         if (expiredMembers.isEmpty()) {
 
             return assignments.get(groupId);
         }
-        transitionTo(groupId, ConsumerGroupState.PREPARING_REBALANCE);
+
+        transitionTo(
+                groupId,
+                ConsumerGroupState.PREPARING_REBALANCE
+        );
+
         for (String memberId : expiredMembers) {
 
-            groupManager.removeMember(groupId, memberId);
+            groupManager.removeMember(
+                    groupId,
+                    memberId
+            );
+
             if (!groupManager.groupExists(groupId)) {
+
                 assignments.remove(groupId);
+
                 return null;
             }
         }
-        transitionTo(groupId, ConsumerGroupState.COMPLETING_REBALANCE);
-        PartitionAssignment assignment = rebalance(groupId, partitionCount);
-        transitionTo(groupId, ConsumerGroupState.STABLE);
+
+        transitionTo(
+                groupId,
+                ConsumerGroupState.COMPLETING_REBALANCE
+        );
+
+        PartitionAssignment assignment =
+                rebalance(
+                        groupId,
+                        partitionCount
+                );
+
+        transitionTo(
+                groupId,
+                ConsumerGroupState.STABLE
+        );
+
         return assignment;
     }
 
@@ -129,10 +388,12 @@ public class ConsumerGroupCoordinator {
             String groupId,
             int partitionCount
     ) {
+
         ConsumerGroup group =
                 groupManager.getGroup(groupId);
 
         if (group == null) {
+
             throw new ConsumerGroupException(
                     "Consumer group does not exist: "
                             + groupId
@@ -157,11 +418,11 @@ public class ConsumerGroupCoordinator {
                 );
 
         /*
-         * Update every member with the
-         * new generation and assignment.
+         * Update every member with the new
+         * generation and assignment.
          */
 
-        for (Map.Entry<String, java.util.List<Integer>> entry
+        for (Map.Entry<String, List<Integer>> entry
                 : assignment.assignments().entrySet()) {
 
             group.updateMemberAssignment(
@@ -183,52 +444,58 @@ public class ConsumerGroupCoordinator {
         return assignment;
     }
 
-    private void transitionTo(String groupId, ConsumerGroupState state) {
-        ConsumerGroup group = groupManager.getGroup(groupId);
+    private void transitionTo(
+            String groupId,
+            ConsumerGroupState state
+    ) {
+
+        ConsumerGroup group =
+                groupManager.getGroup(groupId);
+
         if (group == null) {
-            throw new ConsumerGroupException("Consumer group does not exist: " + groupId);
+
+            throw new ConsumerGroupException(
+                    "Consumer group does not exist: "
+                            + groupId
+            );
         }
+
         group.setState(state);
     }
 
-    public synchronized JoinGroupResult syncGroup(String groupId, String memberId, int generation) {
-        validateGroupId(groupId);
-        validateMemberId(memberId);
+    private void validateGroupId(
+            String groupId
+    ) {
 
-        if (generation < 0) {
-            throw new IllegalArgumentException("Generation cannot be negative");
-        }
-        ConsumerGroup group = groupManager.getGroup(groupId);
-        if (group == null) {
-            throw new ConsumerGroupException("Consumer group does not exist: " + groupId);
-        }
-        GroupMember member = group.getMember(memberId);
-        if (member == null) {
-            throw new ConsumerGroupException("Member does not exist: " + memberId);
-        }
-        PartitionAssignment assignment = assignments.get(groupId);
-        if (assignment == null) {
-            throw new ConsumerGroupException("No partition assignment exists for group: " + groupId);
-        }
-        List<Integer> partitions = assignment.partitionsFor(memberId);
-        return new JoinGroupResult(memberId, member.generation(), partitions);
-    }
-
-    private void validateGroupId(String groupId) {
         if (groupId == null || groupId.isBlank()) {
-            throw new IllegalArgumentException("Group ID cannot be blank");
+
+            throw new IllegalArgumentException(
+                    "Group ID cannot be blank"
+            );
         }
     }
 
-    private void validateMemberId(String memberId) {
+    private void validateMemberId(
+            String memberId
+    ) {
+
         if (memberId == null || memberId.isBlank()) {
-            throw new IllegalArgumentException("Member ID cannot be blank");
+
+            throw new IllegalArgumentException(
+                    "Member ID cannot be blank"
+            );
         }
     }
 
-    private void validatePartitionCount(int partitionCount) {
+    private void validatePartitionCount(
+            int partitionCount
+    ) {
+
         if (partitionCount <= 0) {
-            throw new IllegalArgumentException("Partition count must be greater than zero");
+
+            throw new IllegalArgumentException(
+                    "Partition count must be greater than zero"
+            );
         }
     }
 }

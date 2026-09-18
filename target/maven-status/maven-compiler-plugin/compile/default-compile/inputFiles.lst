@@ -86,6 +86,7 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\Segm
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\SegmentRotationTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\SyncGroupCoordinatorTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\SyncGroupDispatcherTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\SyncGroupGenerationValidationTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\SyncGroupRequestHandlerTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\SyncGroupRequestPayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\SyncGroupResponsePayloadTest.java
