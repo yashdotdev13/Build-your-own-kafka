@@ -36,6 +36,7 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Sync
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Topic.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\TopicManager.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\Consumer.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerAutomaticRejoinTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerCommitTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupCoordinatorTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupFailureDetectionIntegrationTest.java
@@ -50,6 +51,7 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\Cons
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerJoinGroupTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerOffsetStoreTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerPollTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerSyncGroupTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\FetchOffsetResponsePayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\FetchPayloadTest.java

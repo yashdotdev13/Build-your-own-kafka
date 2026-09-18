@@ -61,6 +61,7 @@ com\buildyourownkafka\client\LeaveGroupFailureTest.class
 com\buildyourownkafka\protocol\CommitOffsetPayload.class
 com\buildyourownkafka\client\GenerationRebalanceTest.class
 com\buildyourownkafka\client\SyncGroupDispatcherTest.class
+com\buildyourownkafka\client\ConsumerAutomaticRejoinTest.class
 com\buildyourownkafka\broker\ConsumerGroupCoordinator.class
 com\buildyourownkafka\broker\BrokerServer.class
 com\buildyourownkafka\client\FetchTest.class
@@ -95,6 +96,7 @@ com\buildyourownkafka\broker\JoinGroupRequestHandler.class
 com\buildyourownkafka\client\LeaveGroupDispatcherTest.class
 com\buildyourownkafka\broker\ProduceRequestHandler.class
 com\buildyourownkafka\client\ProducePayloadTest.class
+com\buildyourownkafka\client\ConsumerSyncGroupTest.class
 com\buildyourownkafka\client\OffsetHandlerTest.class
 com\buildyourownkafka\broker\ConsumerGroupException.class
 com\buildyourownkafka\protocol\CreateTopicPayload.class
