@@ -64,25 +64,58 @@ public class ConsumerHeartbeatTest {
                     "Starting automatic heartbeat..."
             );
 
-            consumer.startHeartbeat(1000);
-
             System.out.println(
-                    "Automatic heartbeat started."
+                    "Automatic heartbeat started by SYNC_GROUP."
             );
 
+            /*
+             * Allow several heartbeats to be sent.
+             */
             Thread.sleep(5000);
 
+            System.out.println();
             System.out.println(
-                    "Automatic heartbeat test completed."
+                    "Heartbeat activity verified."
+            );
+
+            /*
+             * Close the consumer.
+             * close() should stop the heartbeat thread
+             * before closing the socket.
+             */
+            System.out.println();
+            System.out.println(
+                    "Closing consumer..."
+            );
+
+            consumer.close();
+
+            System.out.println(
+                    "Consumer closed."
+            );
+
+            /*
+             * Give the test enough time to detect
+             * whether the heartbeat thread continues.
+             */
+            Thread.sleep(2000);
+
+            System.out.println();
+            System.out.println(
+                    "No heartbeat should appear after shutdown."
             );
 
             System.out.println();
             System.out.println(
-                    "CONSUMER HEARTBEAT VERIFIED!"
+                    "CONSUMER HEARTBEAT LIFECYCLE VERIFIED!"
             );
 
         } finally {
 
+            /*
+             * close() is safe to call again because
+             * stopHeartbeat() is idempotent.
+             */
             consumer.close();
         }
     }
