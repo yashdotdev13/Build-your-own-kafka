@@ -15,6 +15,9 @@ import com.buildyourownkafka.protocol.RequestEncoder;
 import com.buildyourownkafka.protocol.Response;
 import com.buildyourownkafka.protocol.ResponseDecoder;
 
+import com.buildyourownkafka.broker.HeartbeatRequestPayload;
+import com.buildyourownkafka.broker.HeartbeatResponsePayload;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
@@ -48,6 +51,11 @@ public class Consumer implements AutoCloseable {
     private final Object requestLock = new Object();
 
     private int correlationId = 1000;
+
+    private static final long DEFAULT_HEARTBEAT_INTERVAL_MILLIS = 3000L;
+
+    private volatile boolean heartbeatRunning;
+    private Thread heartbeatThread;
 
     public Consumer(
             String host,
@@ -296,6 +304,166 @@ public class Consumer implements AutoCloseable {
 
                 this.assignedPartitions =
                         responsePayload.partitions();
+            }
+        }
+    }
+
+    public synchronized void startHeartbeat(long heartbeatIntervalMillis) {
+
+        if (consumerGroupId == null) {
+            throw new IllegalStateException(
+                    "Consumer group ID is required for heartbeat"
+            );
+        }
+
+        if (heartbeatIntervalMillis <= 0) {
+            throw new IllegalArgumentException(
+                    "Heartbeat interval must be greater than zero"
+            );
+        }
+
+        if (heartbeatRunning) {
+            return;
+        }
+
+        heartbeatRunning = true;
+
+        heartbeatThread = Thread.startVirtualThread(
+                () -> heartbeatLoop(heartbeatIntervalMillis)
+        );
+
+        System.out.println(
+                "Consumer heartbeat started. Interval: "
+                        + heartbeatIntervalMillis
+                        + " ms"
+        );
+    }
+
+    private void heartbeatLoop(long heartbeatIntervalMillis) {
+
+        while (heartbeatRunning
+                && !Thread.currentThread().isInterrupted()) {
+
+            try {
+
+                heartbeat();
+
+                System.out.println(
+                        "Consumer heartbeat sent. "
+                                + "member="
+                                + memberId()
+                                + ", generation="
+                                + generation()
+                );
+
+            } catch (Exception e) {
+
+                if (heartbeatRunning) {
+
+                    System.err.println(
+                            "Consumer heartbeat failed: "
+                                    + e.getMessage()
+                    );
+                }
+
+                break;
+            }
+
+            try {
+
+                Thread.sleep(heartbeatIntervalMillis);
+
+            } catch (InterruptedException e) {
+
+                Thread.currentThread().interrupt();
+                break;
+            }
+        }
+    }
+
+    public void heartbeat() throws Exception {
+
+        synchronized (requestLock) {
+
+            String currentMemberId;
+            int currentGeneration;
+
+            synchronized (this) {
+                currentMemberId = this.memberId;
+                currentGeneration = this.generation;
+            }
+
+            if (consumerGroupId == null) {
+                throw new IllegalStateException(
+                        "Consumer group ID is required to send heartbeat"
+                );
+            }
+
+            if (currentMemberId == null
+                    || currentMemberId.isBlank()) {
+
+                throw new IllegalStateException(
+                        "Consumer must join the group before sending heartbeat"
+                );
+            }
+
+            if (currentGeneration < 0) {
+                throw new IllegalStateException(
+                        "Consumer generation cannot be negative"
+                );
+            }
+
+            HeartbeatRequestPayload payload =
+                    new HeartbeatRequestPayload(
+                            consumerGroupId,
+                            currentMemberId,
+                            currentGeneration
+                    );
+
+            Request request =
+                    new Request(
+                            Request.HEARTBEAT,
+                            (short) 1,
+                            nextCorrelationId(),
+                            payload.encode()
+                    );
+
+            requestEncoder.encode(request);
+
+            Response response =
+                    responseDecoder.decode();
+
+            if (response.status()
+                    != Response.SUCCESS) {
+
+                throw new RuntimeException(
+                        "Heartbeat failed: "
+                                + new String(
+                                response.payload()
+                        )
+                );
+            }
+
+            HeartbeatResponsePayload responsePayload =
+                    HeartbeatResponsePayload.decode(
+                            response.payload()
+                    );
+
+            if (!currentMemberId.equals(
+                    responsePayload.memberId()
+            )) {
+
+                throw new IllegalStateException(
+                        "HEARTBEAT returned a different member ID"
+                );
+            }
+
+            if (currentGeneration
+                    != responsePayload.generation()) {
+
+                throw new IllegalStateException(
+                        "HEARTBEAT returned a different generation"
+                );
             }
         }
     }

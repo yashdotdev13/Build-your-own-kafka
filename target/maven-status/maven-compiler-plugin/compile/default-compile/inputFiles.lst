@@ -51,6 +51,7 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\Cons
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupRejoinTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupStateTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerGroupTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerHeartbeatTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerJoinGroupTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerOffsetStoreTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerPollTest.java

@@ -26,6 +26,7 @@ com\buildyourownkafka\client\ConsumerGroupRejoinTest.class
 com\buildyourownkafka\client\ConsumerPollTest.class
 com\buildyourownkafka\protocol\FetchResponsePayload.class
 com\buildyourownkafka\protocol\FrameDecoder.class
+com\buildyourownkafka\client\ConsumerHeartbeatTest.class
 com\buildyourownkafka\client\ProduceResponsePayloadTest.class
 com\buildyourownkafka\broker\ConsumerGroupManager.class
 com\buildyourownkafka\broker\RequestHandler.class
