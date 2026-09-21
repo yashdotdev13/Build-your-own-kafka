@@ -43,20 +43,38 @@ public class Consumer implements AutoCloseable {
      * Protects the complete request/response cycle.
      *
      * A request must be written and its corresponding response
-     * must be read by the same thread before another request
-     * is allowed to use the socket.
-     *
-     * This becomes important once the consumer heartbeat runs
-     * on a separate virtual thread.
+     * must be read before another request can use the socket.
      */
     private final Object requestLock = new Object();
 
     private int correlationId = 1000;
 
-    public Consumer(String host, int port, String topic, int partition, long startingOffset) throws Exception {
-        this(host, port, topic, partition, startingOffset, null);
+    public Consumer(
+            String host,
+            int port,
+            String topic,
+            int partition,
+            long startingOffset
+    ) throws Exception {
+
+        this(
+                host,
+                port,
+                topic,
+                partition,
+                startingOffset,
+                null
+        );
     }
-    public Consumer(String host, int port, String topic, int partition, long startingOffset, String consumerGroupId) throws Exception {
+
+    public Consumer(
+            String host,
+            int port,
+            String topic,
+            int partition,
+            long startingOffset,
+            String consumerGroupId
+    ) throws Exception {
 
         validateHost(host);
         validatePort(port);
@@ -64,9 +82,12 @@ public class Consumer implements AutoCloseable {
         validatePartition(partition);
         validateOffset(startingOffset);
 
-        if (consumerGroupId != null && consumerGroupId.isBlank()) {
+        if (consumerGroupId != null
+                && consumerGroupId.isBlank()) {
 
-            throw new IllegalArgumentException("Consumer group ID cannot be blank");
+            throw new IllegalArgumentException(
+                    "Consumer group ID cannot be blank"
+            );
         }
 
         this.topic = topic;
@@ -74,194 +95,515 @@ public class Consumer implements AutoCloseable {
         this.currentOffset = startingOffset;
         this.consumerGroupId = consumerGroupId;
 
-        this.memberId = "consumer-" + UUID.randomUUID();
+        this.memberId =
+                "consumer-" + UUID.randomUUID();
+
         this.generation = 0;
+
         this.assignedPartitions = List.of();
-        this.socket = new Socket(host, port);
-        this.input = new DataInputStream(socket.getInputStream());
-        this.output = new DataOutputStream(socket.getOutputStream());
-        this.requestEncoder = new RequestEncoder(output);
-        this.responseDecoder = new ResponseDecoder(input);
+
+        this.socket =
+                new Socket(host, port);
+
+        this.input =
+                new DataInputStream(
+                        socket.getInputStream()
+                );
+
+        this.output =
+                new DataOutputStream(
+                        socket.getOutputStream()
+                );
+
+        this.requestEncoder =
+                new RequestEncoder(output);
+
+        this.responseDecoder =
+                new ResponseDecoder(input);
     }
 
-    public Consumer(String host, int port, String topic, int partition, String consumerGroupId) throws Exception {
-        this(host, port, topic, partition, 0L, consumerGroupId);
-        this.currentOffset = fetchCommittedOffset();
+    public Consumer(
+            String host,
+            int port,
+            String topic,
+            int partition,
+            String consumerGroupId
+    ) throws Exception {
+
+        this(
+                host,
+                port,
+                topic,
+                partition,
+                0L,
+                consumerGroupId
+        );
+
+        this.currentOffset =
+                fetchCommittedOffset();
     }
 
-    public synchronized void joinGroup(int partitionCount) throws Exception {
+    public void joinGroup(
+            int partitionCount
+    ) throws Exception {
 
-        if (consumerGroupId == null) {
-            throw new IllegalStateException("Consumer group ID is required to join a group");
-        }
-
-        if (partitionCount <= 0) {
-            throw new IllegalArgumentException("Partition count must be greater than zero");
-        }
-
-        JoinGroupRequestPayload payload = new JoinGroupRequestPayload(consumerGroupId, memberId, partitionCount);
-        Request request = new Request(Request.JOIN_GROUP, (short) 1, correlationId++, payload.encode());
-        requestEncoder.encode(request);
-        Response response = responseDecoder.decode();
-        if (response.status() != Response.SUCCESS) {
-            throw new RuntimeException("Join group failed: " + new String(response.payload()));
-        }
-
-        JoinGroupResponsePayload responsePayload = JoinGroupResponsePayload.decode(response.payload());
-        this.memberId = responsePayload.memberId();
-        this.generation = responsePayload.generation();
-        this.assignedPartitions = List.of();
-    }
-
-    public synchronized void syncGroup() throws Exception {
-
-        if (consumerGroupId == null) {
-            throw new IllegalStateException("Consumer group ID is required to sync group");
-        }
-
-        if (memberId == null || memberId.isBlank()) {
-            throw new IllegalStateException("Consumer must join the group before syncing");
-        }
-        if (generation < 0) {
-            throw new IllegalStateException("Consumer generation cannot be negative");
-        }
-
-        SyncGroupRequestPayload payload = new SyncGroupRequestPayload(consumerGroupId, memberId, generation);
-
-        Request request = new Request(Request.SYNC_GROUP, (short) 1, correlationId++, payload.encode());
-        requestEncoder.encode(request);
-        Response response = responseDecoder.decode();
-        if (response.status() != Response.SUCCESS) {
-            throw new RuntimeException("Sync group failed: " + new String(response.payload()));
-        }
-
-        SyncGroupResponsePayload responsePayload = SyncGroupResponsePayload.decode(response.payload());
-        if (!memberId.equals(responsePayload.memberId())) {
-            throw new IllegalStateException("SYNC_GROUP returned a different member ID");
-        }
-        this.generation = responsePayload.generation();
-        this.assignedPartitions = responsePayload.partitions();
-    }
-
-    public List<Record> poll() throws Exception {
         synchronized (requestLock) {
 
-            FetchPayload payload = new FetchPayload(topic, partition, currentOffset);
-            Request request = new Request(Request.FETCH, (short) 1, correlationId++, payload.encode());
-            requestEncoder.encode(request);
-            Response response = responseDecoder.decode();
-            if (response.status() != Response.SUCCESS) {
-                throw new RuntimeException("Fetch failed: " + new String(response.payload()));
+            if (consumerGroupId == null) {
+                throw new IllegalStateException(
+                        "Consumer group ID is required to join a group"
+                );
             }
 
-            FetchResponsePayload fetchResponse = FetchResponsePayload.decode(response.payload());
-            List<Record> records = fetchResponse.records();
-            if (!records.isEmpty()) {
-                Record lastRecord = records.get(records.size() - 1);
-                currentOffset = lastRecord.offset() + 1;
+            if (partitionCount <= 0) {
+                throw new IllegalArgumentException(
+                        "Partition count must be greater than zero"
+                );
             }
+
+            JoinGroupRequestPayload payload =
+                    new JoinGroupRequestPayload(
+                            consumerGroupId,
+                            memberId,
+                            partitionCount
+                    );
+
+            Request request =
+                    new Request(
+                            Request.JOIN_GROUP,
+                            (short) 1,
+                            nextCorrelationId(),
+                            payload.encode()
+                    );
+
+            requestEncoder.encode(request);
+
+            Response response =
+                    responseDecoder.decode();
+
+            if (response.status()
+                    != Response.SUCCESS) {
+
+                throw new RuntimeException(
+                        "Join group failed: "
+                                + new String(
+                                response.payload()
+                        )
+                );
+            }
+
+            JoinGroupResponsePayload responsePayload =
+                    JoinGroupResponsePayload.decode(
+                            response.payload()
+                    );
+
+            synchronized (this) {
+
+                this.memberId =
+                        responsePayload.memberId();
+
+                this.generation =
+                        responsePayload.generation();
+
+                this.assignedPartitions =
+                        List.of();
+            }
+        }
+    }
+
+    public void syncGroup()
+            throws Exception {
+
+        synchronized (requestLock) {
+
+            String currentMemberId;
+            int currentGeneration;
+
+            synchronized (this) {
+                currentMemberId = this.memberId;
+                currentGeneration = this.generation;
+            }
+
+            if (consumerGroupId == null) {
+                throw new IllegalStateException(
+                        "Consumer group ID is required to sync group"
+                );
+            }
+
+            if (currentMemberId == null
+                    || currentMemberId.isBlank()) {
+
+                throw new IllegalStateException(
+                        "Consumer must join the group before syncing"
+                );
+            }
+
+            if (currentGeneration < 0) {
+                throw new IllegalStateException(
+                        "Consumer generation cannot be negative"
+                );
+            }
+
+            SyncGroupRequestPayload payload =
+                    new SyncGroupRequestPayload(
+                            consumerGroupId,
+                            currentMemberId,
+                            currentGeneration
+                    );
+
+            Request request =
+                    new Request(
+                            Request.SYNC_GROUP,
+                            (short) 1,
+                            nextCorrelationId(),
+                            payload.encode()
+                    );
+
+            requestEncoder.encode(request);
+
+            Response response =
+                    responseDecoder.decode();
+
+            if (response.status()
+                    != Response.SUCCESS) {
+
+                throw new RuntimeException(
+                        "Sync group failed: "
+                                + new String(
+                                response.payload()
+                        )
+                );
+            }
+
+            SyncGroupResponsePayload responsePayload =
+                    SyncGroupResponsePayload.decode(
+                            response.payload()
+                    );
+
+            if (!currentMemberId.equals(
+                    responsePayload.memberId()
+            )) {
+
+                throw new IllegalStateException(
+                        "SYNC_GROUP returned a different member ID"
+                );
+            }
+
+            synchronized (this) {
+
+                this.generation =
+                        responsePayload.generation();
+
+                this.assignedPartitions =
+                        responsePayload.partitions();
+            }
+        }
+    }
+
+    public List<Record> poll()
+            throws Exception {
+
+        synchronized (requestLock) {
+
+            long offset;
+
+            synchronized (this) {
+                offset = currentOffset;
+            }
+
+            FetchPayload payload =
+                    new FetchPayload(
+                            topic,
+                            partition,
+                            offset
+                    );
+
+            Request request =
+                    new Request(
+                            Request.FETCH,
+                            (short) 1,
+                            nextCorrelationId(),
+                            payload.encode()
+                    );
+
+            requestEncoder.encode(request);
+
+            Response response =
+                    responseDecoder.decode();
+
+            if (response.status()
+                    != Response.SUCCESS) {
+
+                throw new RuntimeException(
+                        "Fetch failed: "
+                                + new String(
+                                response.payload()
+                        )
+                );
+            }
+
+            FetchResponsePayload fetchResponse =
+                    FetchResponsePayload.decode(
+                            response.payload()
+                    );
+
+            List<Record> records =
+                    fetchResponse.records();
+
+            if (!records.isEmpty()) {
+
+                Record lastRecord =
+                        records.get(
+                                records.size() - 1
+                        );
+
+                synchronized (this) {
+
+                    currentOffset =
+                            lastRecord.offset() + 1;
+                }
+            }
+
             return records;
         }
     }
 
-    public synchronized void commit() throws Exception {
-        if (consumerGroupId == null) {
-            throw new IllegalStateException("Consumer group ID is required to commit offsets");
-        }
-        CommitOffsetPayload payload = new CommitOffsetPayload(consumerGroupId, topic, partition, currentOffset);
-        Request request = new Request(Request.COMMIT_OFFSET, (short) 1, correlationId++, payload.encode());
-        requestEncoder.encode(request);
-        Response response = responseDecoder.decode();
-        if (response.status() != Response.SUCCESS) {
-            throw new RuntimeException("Offset commit failed: " + new String(response.payload()));
+    public void commit()
+            throws Exception {
+
+        synchronized (requestLock) {
+
+            if (consumerGroupId == null) {
+                throw new IllegalStateException(
+                        "Consumer group ID is required to commit offsets"
+                );
+            }
+
+            long offset;
+
+            synchronized (this) {
+                offset = currentOffset;
+            }
+
+            CommitOffsetPayload payload =
+                    new CommitOffsetPayload(
+                            consumerGroupId,
+                            topic,
+                            partition,
+                            offset
+                    );
+
+            Request request =
+                    new Request(
+                            Request.COMMIT_OFFSET,
+                            (short) 1,
+                            nextCorrelationId(),
+                            payload.encode()
+                    );
+
+            requestEncoder.encode(request);
+
+            Response response =
+                    responseDecoder.decode();
+
+            if (response.status()
+                    != Response.SUCCESS) {
+
+                throw new RuntimeException(
+                        "Offset commit failed: "
+                                + new String(
+                                response.payload()
+                        )
+                );
+            }
         }
     }
 
-    public synchronized void rejoinGroup(int partitionCount) throws Exception {
+    public void rejoinGroup(
+            int partitionCount
+    ) throws Exception {
 
         if (consumerGroupId == null) {
-            throw new IllegalStateException("Consumer group ID is required to rejoin a group");
+            throw new IllegalStateException(
+                    "Consumer group ID is required to rejoin a group"
+            );
         }
+
         joinGroup(partitionCount);
+
         syncGroup();
     }
 
-    private synchronized long fetchCommittedOffset() throws Exception {
-        if (consumerGroupId == null) {
-            throw new IllegalStateException("Consumer group ID is required to fetch committed offset");
+    private long fetchCommittedOffset()
+            throws Exception {
+
+        synchronized (requestLock) {
+
+            if (consumerGroupId == null) {
+                throw new IllegalStateException(
+                        "Consumer group ID is required to fetch committed offset"
+                );
+            }
+
+            FetchOffsetPayload payload =
+                    new FetchOffsetPayload(
+                            consumerGroupId,
+                            topic,
+                            partition
+                    );
+
+            Request request =
+                    new Request(
+                            Request.FETCH_OFFSET,
+                            (short) 1,
+                            nextCorrelationId(),
+                            payload.encode()
+                    );
+
+            requestEncoder.encode(request);
+
+            Response response =
+                    responseDecoder.decode();
+
+            if (response.status()
+                    != Response.SUCCESS) {
+
+                throw new RuntimeException(
+                        "Failed to fetch committed offset: "
+                                + new String(
+                                response.payload()
+                        )
+                );
+            }
+
+            FetchOffsetResponsePayload responsePayload =
+                    FetchOffsetResponsePayload.decode(
+                            response.payload()
+                    );
+
+            return responsePayload.offset();
         }
-        FetchOffsetPayload payload = new FetchOffsetPayload(consumerGroupId, topic, partition);
-        Request request = new Request(Request.FETCH_OFFSET, (short) 1, correlationId++, payload.encode());
-        requestEncoder.encode(request);
-        Response response = responseDecoder.decode();
-        if (response.status() != Response.SUCCESS) {
-            throw new RuntimeException("Failed to fetch committed offset: " + new String(response.payload()));
-        }
-        FetchOffsetResponsePayload responsePayload = FetchOffsetResponsePayload.decode(response.payload());
-        return responsePayload.offset();
     }
+
+    private synchronized int nextCorrelationId() {
+
+        return correlationId++;
+    }
+
     public String topic() {
         return topic;
     }
+
     public int partition() {
         return partition;
     }
+
     public String consumerGroupId() {
         return consumerGroupId;
     }
+
     public synchronized long currentOffset() {
         return currentOffset;
     }
+
     public synchronized String memberId() {
         return memberId;
     }
+
     public synchronized int generation() {
         return generation;
     }
+
     public synchronized List<Integer> assignedPartitions() {
-        return List.copyOf(assignedPartitions);
+        return List.copyOf(
+                assignedPartitions
+        );
     }
+
     public synchronized boolean isGroupMember() {
         return memberId != null;
     }
 
-    public synchronized void advanceOffset(long nextOffset) {
+    public synchronized void advanceOffset(
+            long nextOffset
+    ) {
+
         if (nextOffset < currentOffset) {
-            throw new IllegalArgumentException("Consumer offset cannot move backwards");
+            throw new IllegalArgumentException(
+                    "Consumer offset cannot move backwards"
+            );
         }
-        this.currentOffset = nextOffset;
+
+        this.currentOffset =
+                nextOffset;
     }
 
     @Override
-    public void close() throws Exception {
+    public void close()
+            throws Exception {
+
         socket.close();
     }
 
-    private static void validateHost(String host) {
-        if (host == null || host.isBlank()) {
-            throw new IllegalArgumentException("Host cannot be blank");
+    private static void validateHost(
+            String host
+    ) {
+
+        if (host == null
+                || host.isBlank()) {
+
+            throw new IllegalArgumentException(
+                    "Host cannot be blank"
+            );
         }
     }
 
-    private static void validatePort(int port) {
+    private static void validatePort(
+            int port
+    ) {
+
         if (port <= 0) {
-            throw new IllegalArgumentException("Port must be greater than zero");
+
+            throw new IllegalArgumentException(
+                    "Port must be greater than zero"
+            );
         }
     }
 
-    private static void validateTopic(String topic) {
-        if (topic == null || topic.isBlank()) {
-            throw new IllegalArgumentException("Topic cannot be blank");
+    private static void validateTopic(
+            String topic
+    ) {
+
+        if (topic == null
+                || topic.isBlank()) {
+
+            throw new IllegalArgumentException(
+                    "Topic cannot be blank"
+            );
         }
     }
-    private static void validatePartition(int partition) {
+
+    private static void validatePartition(
+            int partition
+    ) {
+
         if (partition < 0) {
-            throw new IllegalArgumentException("Partition cannot be negative");
+
+            throw new IllegalArgumentException(
+                    "Partition cannot be negative"
+            );
         }
     }
-    private static void validateOffset(long offset) {
+
+    private static void validateOffset(
+            long offset
+    ) {
+
         if (offset < 0) {
-            throw new IllegalArgumentException("Starting offset cannot be negative");
+
+            throw new IllegalArgumentException(
+                    "Starting offset cannot be negative"
+            );
         }
     }
 }
