@@ -15,6 +15,9 @@ import com.buildyourownkafka.protocol.RequestEncoder;
 import com.buildyourownkafka.protocol.Response;
 import com.buildyourownkafka.protocol.ResponseDecoder;
 
+import com.buildyourownkafka.broker.HeartbeatRequestPayload;
+import com.buildyourownkafka.broker.HeartbeatResponsePayload;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
@@ -26,21 +29,39 @@ public class Consumer implements AutoCloseable {
     private final String topic;
     private final int partition;
     private final String consumerGroupId;
+
     private long currentOffset;
     private String memberId;
     private int generation;
     private List<Integer> assignedPartitions;
+
     private final Socket socket;
     private final DataInputStream input;
     private final DataOutputStream output;
+
     private final RequestEncoder requestEncoder;
     private final ResponseDecoder responseDecoder;
+
+    /*
+     * Protects the complete request/response cycle.
+     *
+     * A request must be written and its corresponding response
+     * must be read before another request can use the socket.
+     */
+    private final Object requestLock = new Object();
+
     private int correlationId = 1000;
+
+    private static final long DEFAULT_HEARTBEAT_INTERVAL_MILLIS = 3000L;
+
+    private volatile boolean heartbeatRunning;
+    private Thread heartbeatThread;
 
     public Consumer(String host, int port, String topic, int partition, long startingOffset) throws Exception {
         this(host, port, topic, partition, startingOffset, null);
     }
-    public Consumer(String host, int port, String topic, int partition, long startingOffset, String consumerGroupId) throws Exception {
+    public Consumer(String host, int port, String topic, int partition, long startingOffset,
+                    String consumerGroupId) throws Exception {
 
         validateHost(host);
         validatePort(port);
@@ -65,115 +86,252 @@ public class Consumer implements AutoCloseable {
         this.requestEncoder = new RequestEncoder(output);
         this.responseDecoder = new ResponseDecoder(input);
     }
+
     public Consumer(String host, int port, String topic, int partition, String consumerGroupId) throws Exception {
         this(host, port, topic, partition, 0L, consumerGroupId);
         this.currentOffset = fetchCommittedOffset();
     }
 
-    public synchronized void joinGroup(int partitionCount) throws Exception {
+    public void joinGroup(int partitionCount) throws Exception {
+        synchronized (requestLock) {
+            if (consumerGroupId == null) {
+                throw new IllegalStateException("Consumer group ID is required to join a group");
+            }
+            if (partitionCount <= 0) {
+                throw new IllegalArgumentException("Partition count must be greater than zero");
+            }
+            JoinGroupRequestPayload payload = new JoinGroupRequestPayload(consumerGroupId, memberId, partitionCount);
+            Request request = new Request(Request.JOIN_GROUP, (short) 1, nextCorrelationId(), payload.encode());
+            requestEncoder.encode(request);
+            Response response = responseDecoder.decode();
+            if (response.status() != Response.SUCCESS) {
+                throw new RuntimeException("Join group failed: " + new String(response.payload()));
+            }
+            JoinGroupResponsePayload responsePayload = JoinGroupResponsePayload.decode(response.payload());
 
+            synchronized (this) {
+                this.memberId = responsePayload.memberId();
+                this.generation = responsePayload.generation();
+                this.assignedPartitions = List.of();
+            }
+        }
+    }
+
+    public void syncGroup() throws Exception {
+        synchronized (requestLock) {
+
+            String currentMemberId;
+            int currentGeneration;
+
+            synchronized (this) {
+                currentMemberId = this.memberId;
+                currentGeneration = this.generation;
+            }
+            if (consumerGroupId == null) {
+                throw new IllegalStateException("Consumer group ID is required to sync group");
+            }
+
+            if (currentMemberId == null || currentMemberId.isBlank()) {
+                throw new IllegalStateException("Consumer must join the group before syncing");
+            }
+            if (currentGeneration < 0) {
+                throw new IllegalStateException("Consumer generation cannot be negative");
+            }
+            SyncGroupRequestPayload payload = new SyncGroupRequestPayload(consumerGroupId, currentMemberId, currentGeneration);
+            Request request = new Request(Request.SYNC_GROUP, (short) 1, nextCorrelationId(), payload.encode());
+            requestEncoder.encode(request);
+            Response response = responseDecoder.decode();
+            if (response.status() != Response.SUCCESS) {
+                throw new RuntimeException("Sync group failed: " + new String(response.payload()));
+            }
+            SyncGroupResponsePayload responsePayload = SyncGroupResponsePayload.decode(response.payload());
+
+            if (!currentMemberId.equals(responsePayload.memberId())) {
+                throw new IllegalStateException("SYNC_GROUP returned a different member ID");
+            }
+            synchronized (this) {
+                this.generation = responsePayload.generation();
+                this.assignedPartitions = responsePayload.partitions();
+            }
+            startHeartbeat();
+        }
+    }
+
+    public synchronized void startHeartbeat() {
+        startHeartbeat(DEFAULT_HEARTBEAT_INTERVAL_MILLIS);
+    }
+    public synchronized void startHeartbeat(long heartbeatIntervalMillis) {
         if (consumerGroupId == null) {
-            throw new IllegalStateException("Consumer group ID is required to join a group");
+            throw new IllegalStateException("Consumer group ID is required for heartbeat");
         }
-        if (partitionCount <= 0) {
-            throw new IllegalArgumentException("Partition count must be greater than zero");
+        if (heartbeatIntervalMillis <= 0) {
+            throw new IllegalArgumentException("Heartbeat interval must be greater than zero");
         }
-        JoinGroupRequestPayload payload = new JoinGroupRequestPayload(consumerGroupId, memberId, partitionCount);
-        Request request = new Request(Request.JOIN_GROUP, (short) 1, correlationId++, payload.encode());
-        requestEncoder.encode(request);
-        Response response = responseDecoder.decode();
-
-        if (response.status() != Response.SUCCESS) {
-            throw new RuntimeException("Join group failed: " + new String(response.payload()));
+        if (heartbeatRunning) {
+            return;
         }
-
-        JoinGroupResponsePayload responsePayload = JoinGroupResponsePayload.decode(response.payload());
-        this.memberId = responsePayload.memberId();
-        this.generation = responsePayload.generation();
-        this.assignedPartitions = List.of();
+        heartbeatRunning = true;
+        heartbeatThread = Thread.startVirtualThread(() -> heartbeatLoop(heartbeatIntervalMillis));
+        System.out.println("Consumer heartbeat started. Interval: " + heartbeatIntervalMillis + " ms");
     }
 
-    public synchronized void syncGroup() throws Exception {
-        if (consumerGroupId == null) {
-            throw new IllegalStateException("Consumer group ID is required to sync group");
-        }
-        if (memberId == null || memberId.isBlank()) {
-            throw new IllegalStateException("Consumer must join the group before syncing");
-        }
-        if (generation < 0) {
-            throw new IllegalStateException("Consumer generation cannot be negative");
-        }
-        SyncGroupRequestPayload payload = new SyncGroupRequestPayload(consumerGroupId, memberId, generation);
-        Request request = new Request(Request.SYNC_GROUP, (short) 1, correlationId++, payload.encode());
-        requestEncoder.encode(request);
-        Response response = responseDecoder.decode();
-        if (response.status() != Response.SUCCESS) {
-            throw new RuntimeException("Sync group failed: " + new String(response.payload()));
-        }
-        SyncGroupResponsePayload responsePayload = SyncGroupResponsePayload.decode(response.payload());
-        if (!memberId.equals(responsePayload.memberId())) {
-            throw new IllegalStateException("SYNC_GROUP returned a different member ID");
-        }
+    private void heartbeatLoop(long heartbeatIntervalMillis) {
+        while (heartbeatRunning && !Thread.currentThread().isInterrupted()) {
 
-        this.generation = responsePayload.generation();
-        this.assignedPartitions = responsePayload.partitions();
-    }
-    public synchronized List<Record> poll() throws Exception {
-
-        FetchPayload payload = new FetchPayload(topic, partition, currentOffset);
-        Request request = new Request(Request.FETCH, (short) 1, correlationId++, payload.encode());
-        requestEncoder.encode(request);
-        Response response = responseDecoder.decode();
-        if (response.status() != Response.SUCCESS) {
-            throw new RuntimeException("Fetch failed: " + new String(response.payload()));
+            try {
+                heartbeat();
+                System.out.println("Consumer heartbeat sent. " + "member=" + memberId() + ", generation=" + generation());
+            } catch (Exception e) {
+                if (heartbeatRunning) {
+                    System.err.println("Consumer heartbeat failed: " + e.getMessage());
+                }
+                break;
+            }
+            try {
+                Thread.sleep(heartbeatIntervalMillis);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                break;
+            }
         }
-        FetchResponsePayload fetchResponse = FetchResponsePayload.decode(response.payload());
-        List<Record> records = fetchResponse.records();
-        if (!records.isEmpty()) {
-            Record lastRecord = records.get(records.size() - 1);
-            currentOffset = lastRecord.offset() + 1;
-        }
-        return records;
     }
 
-    public synchronized void commit() throws Exception {
-        if (consumerGroupId == null) {
-            throw new IllegalStateException("Consumer group ID is required to commit offsets");
-        }
-        CommitOffsetPayload payload = new CommitOffsetPayload(consumerGroupId, topic, partition, currentOffset);
-        Request request = new Request(Request.COMMIT_OFFSET, (short) 1, correlationId++, payload.encode());
-        requestEncoder.encode(request);
-        Response response = responseDecoder.decode();
-        if (response.status() != Response.SUCCESS) {
-            throw new RuntimeException("Offset commit failed: " + new String(response.payload()));
+    public void heartbeat() throws Exception {
+        synchronized (requestLock) {
+
+            String currentMemberId;
+            int currentGeneration;
+
+            synchronized (this) {
+                currentMemberId = this.memberId;
+                currentGeneration = this.generation;
+            }
+            if (consumerGroupId == null) {
+                throw new IllegalStateException("Consumer group ID is required to send heartbeat");
+            }
+            if (currentMemberId == null || currentMemberId.isBlank()) {
+                throw new IllegalStateException("Consumer must join the group before sending heartbeat");
+            }
+            if (currentGeneration < 0) {
+                throw new IllegalStateException("Consumer generation cannot be negative");
+            }
+            HeartbeatRequestPayload payload = new HeartbeatRequestPayload(consumerGroupId, currentMemberId, currentGeneration);
+
+            Request request = new Request(Request.HEARTBEAT, (short) 1, nextCorrelationId(), payload.encode());
+            requestEncoder.encode(request);
+            Response response = responseDecoder.decode();
+            if (response.status() != Response.SUCCESS) {
+                throw new RuntimeException("Heartbeat failed: " + new String(response.payload()));
+            }
+
+            HeartbeatResponsePayload responsePayload = HeartbeatResponsePayload.decode(response.payload());
+            if (!currentMemberId.equals(responsePayload.memberId())) {
+                throw new IllegalStateException("HEARTBEAT returned a different member ID");
+            }
+            if (currentGeneration != responsePayload.generation()) {
+                throw new IllegalStateException("HEARTBEAT returned a different generation");
+            }
         }
     }
-    public synchronized void rejoinGroup(int partitionCount) throws Exception {
+
+
+    public synchronized void stopHeartbeat() {
+        if (!heartbeatRunning) {
+            return;
+        }
+
+        heartbeatRunning = false;
+        Thread thread = heartbeatThread;
+        if (thread != null) {
+            thread.interrupt();
+        }
+        heartbeatThread = null;
+        System.out.println("Consumer heartbeat stopped.");
+    }
+
+    public List<Record> poll() throws Exception {
+
+        synchronized (requestLock) {
+
+            long offset;
+            synchronized (this) {
+                offset = currentOffset;
+            }
+
+            FetchPayload payload = new FetchPayload(topic, partition, offset);
+            Request request = new Request(Request.FETCH, (short) 1, nextCorrelationId(), payload.encode());
+            requestEncoder.encode(request);
+            Response response = responseDecoder.decode();
+            if (response.status() != Response.SUCCESS) {
+                throw new RuntimeException("Fetch failed: " + new String(response.payload()));
+            }
+
+            FetchResponsePayload fetchResponse = FetchResponsePayload.decode(response.payload());
+            List<Record> records = fetchResponse.records();
+            if (!records.isEmpty()) {
+                Record lastRecord = records.get(records.size() - 1);
+                synchronized (this) {
+                    currentOffset = lastRecord.offset() + 1;
+                }
+            }
+            return records;
+        }
+    }
+    public void commit() throws Exception {
+
+        synchronized (requestLock) {
+            if (consumerGroupId == null) {
+                throw new IllegalStateException("Consumer group ID is required to commit offsets");
+            }
+            long offset;
+            synchronized (this) {
+                offset = currentOffset;
+            }
+
+            CommitOffsetPayload payload = new CommitOffsetPayload(consumerGroupId, topic, partition, offset);
+            Request request = new Request(Request.COMMIT_OFFSET, (short) 1, nextCorrelationId(), payload.encode());
+            requestEncoder.encode(request);
+            Response response = responseDecoder.decode();
+            if (response.status() != Response.SUCCESS) {
+                throw new RuntimeException("Offset commit failed: " + new String(response.payload()));
+            }
+        }
+    }
+    public void rejoinGroup(int partitionCount) throws Exception {
+
         if (consumerGroupId == null) {
             throw new IllegalStateException("Consumer group ID is required to rejoin a group");
         }
         joinGroup(partitionCount);
         syncGroup();
     }
-    private synchronized long fetchCommittedOffset() throws Exception {
 
-        if (consumerGroupId == null) {
-            throw new IllegalStateException("Consumer group ID is required to fetch committed offset");
+    private long fetchCommittedOffset() throws Exception {
+
+        synchronized (requestLock) {
+            if (consumerGroupId == null) {
+                throw new IllegalStateException("Consumer group ID is required to fetch committed offset");
+            }
+            FetchOffsetPayload payload = new FetchOffsetPayload(consumerGroupId, topic, partition);
+            Request request = new Request(Request.FETCH_OFFSET, (short) 1, nextCorrelationId(), payload.encode());
+            requestEncoder.encode(request);
+            Response response = responseDecoder.decode();
+            if (response.status() != Response.SUCCESS) {
+                throw new RuntimeException("Failed to fetch committed offset: " + new String(response.payload()));
+            }
+            FetchOffsetResponsePayload responsePayload = FetchOffsetResponsePayload.decode(response.payload());
+            return responsePayload.offset();
         }
-        FetchOffsetPayload payload = new FetchOffsetPayload(consumerGroupId, topic, partition);
-        Request request = new Request(Request.FETCH_OFFSET, (short) 1, correlationId++, payload.encode());
-        requestEncoder.encode(request);
-        Response response = responseDecoder.decode();
-        if (response.status() != Response.SUCCESS) {
-            throw new RuntimeException("Failed to fetch committed offset: " + new String(response.payload()));
-        }
-        FetchOffsetResponsePayload responsePayload = FetchOffsetResponsePayload.decode(response.payload());
-        return responsePayload.offset();
+    }
+
+    private synchronized int nextCorrelationId() {
+        return correlationId++;
     }
 
     public String topic() {
         return topic;
     }
+
     public int partition() {
         return partition;
     }
@@ -181,6 +339,7 @@ public class Consumer implements AutoCloseable {
     public String consumerGroupId() {
         return consumerGroupId;
     }
+
     public synchronized long currentOffset() {
         return currentOffset;
     }
@@ -188,6 +347,7 @@ public class Consumer implements AutoCloseable {
     public synchronized String memberId() {
         return memberId;
     }
+
     public synchronized int generation() {
         return generation;
     }
@@ -195,12 +355,12 @@ public class Consumer implements AutoCloseable {
     public synchronized List<Integer> assignedPartitions() {
         return List.copyOf(assignedPartitions);
     }
+
     public synchronized boolean isGroupMember() {
         return memberId != null;
     }
 
     public synchronized void advanceOffset(long nextOffset) {
-
         if (nextOffset < currentOffset) {
             throw new IllegalArgumentException("Consumer offset cannot move backwards");
         }
@@ -209,24 +369,30 @@ public class Consumer implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        socket.close();
-    }
-    private static void validateHost(String host) {
 
+        stopHeartbeat();
+        socket.close();
+        System.out.println("Consumer connection closed.");
+    }
+
+    private static void validateHost(String host) {
         if (host == null || host.isBlank()) {
             throw new IllegalArgumentException("Host cannot be blank");
         }
     }
+
     private static void validatePort(int port) {
         if (port <= 0) {
             throw new IllegalArgumentException("Port must be greater than zero");
         }
     }
+
     private static void validateTopic(String topic) {
         if (topic == null || topic.isBlank()) {
             throw new IllegalArgumentException("Topic cannot be blank");
         }
     }
+
     private static void validatePartition(int partition) {
         if (partition < 0) {
             throw new IllegalArgumentException("Partition cannot be negative");
