@@ -14,84 +14,33 @@ public class HeartbeatRequestHandlerTest {
     public static void main(String[] args) throws Exception {
 
         System.out.println("=== HEARTBEAT REQUEST HANDLER TEST ===");
-
-        ConsumerGroupManager groupManager =
-                new ConsumerGroupManager();
-
-        ConsumerGroupCoordinator coordinator =
-                new ConsumerGroupCoordinator(groupManager);
+        ConsumerGroupManager groupManager = new ConsumerGroupManager();
+        ConsumerGroupCoordinator coordinator = new ConsumerGroupCoordinator(groupManager);
 
         String groupId = "orders-group";
         String memberId = "consumer-A";
 
         groupManager.getOrCreateGroup(groupId);
-
-        groupManager.addMember(
-                groupId,
-                memberId
-        );
-
-        HeartbeatRequestPayload payload =
-                new HeartbeatRequestPayload(
-                        groupId,
-                        memberId,
-                        0
-                );
-
-        Request request =
-                new Request(
-                        Request.HEARTBEAT,
-                        (short) 1,
-                        100,
-                        payload.encode()
-                );
-
-        HeartbeatRequestHandler handler =
-                new HeartbeatRequestHandler(coordinator);
-
-        Response response =
-                handler.handle(request);
-
-        System.out.println(
-                "Response status: " + response.status()
-        );
-
+        groupManager.addMember(groupId, memberId);
+        HeartbeatRequestPayload payload = new HeartbeatRequestPayload(groupId, memberId, 0);
+        Request request = new Request(Request.HEARTBEAT, (short) 1, 100, payload.encode());
+        HeartbeatRequestHandler handler = new HeartbeatRequestHandler(coordinator);
+        Response response = handler.handle(request);
+        System.out.println("Response status: " + response.status());
         if (response.status() != Response.SUCCESS) {
-            throw new AssertionError(
-                    "HEARTBEAT request failed: "
-                            + new String(response.payload())
-            );
+            throw new AssertionError("HEARTBEAT request failed: " + new String(response.payload()));
         }
 
-        HeartbeatResponsePayload responsePayload =
-                HeartbeatResponsePayload.decode(
-                        response.payload()
-                );
-
-        System.out.println(
-                "Response member: "
-                        + responsePayload.memberId()
-        );
-
-        System.out.println(
-                "Response generation: "
-                        + responsePayload.generation()
-        );
+        HeartbeatResponsePayload responsePayload = HeartbeatResponsePayload.decode(response.payload());
+        System.out.println("Response member: " + responsePayload.memberId());
+        System.out.println("Response generation: " + responsePayload.generation());
 
         if (!memberId.equals(responsePayload.memberId())) {
-            throw new AssertionError(
-                    "Member ID mismatch"
-            );
+            throw new AssertionError("Member ID mismatch");
         }
-
         if (responsePayload.generation() != 0) {
-            throw new AssertionError(
-                    "Generation mismatch"
-            );
+            throw new AssertionError("Generation mismatch");
         }
-
-        System.out.println(
-                "HEARTBEAT REQUEST HANDLER VERIFIED!"
-        );
+        System.out.println("HEARTBEAT REQUEST HANDLER VERIFIED!");
     }
 }
