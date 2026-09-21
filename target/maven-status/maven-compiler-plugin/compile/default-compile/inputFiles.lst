@@ -62,6 +62,8 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\Fetc
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\FetchTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\GenerationRebalanceTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\GroupMemberTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\HeartbeatDispatcherTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\HeartbeatRequestHandlerTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\HeartbeatRequestPayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\JoinGroupCoordinatorTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\JoinGroupPayloadTest.java
