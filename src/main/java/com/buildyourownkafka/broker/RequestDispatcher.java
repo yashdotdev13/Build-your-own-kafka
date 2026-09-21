@@ -27,6 +27,12 @@ public class RequestDispatcher {
                 Request.LEAVE_GROUP,
                 new LeaveGroupRequestHandler(consumerGroupCoordinator)
         );
+        register(
+                Request.HEARTBEAT,
+                new HeartbeatRequestHandler(
+                        consumerGroupCoordinator
+                )
+        );
     }
 
     private void register(int requestType, RequestHandler handler) {
