@@ -12,6 +12,9 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Crea
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\FetchOffsetRequestHandler.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\FetchRequestHandler.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\GroupMember.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\HeartbeatRequestHandler.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\HeartbeatRequestPayload.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\HeartbeatResponsePayload.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\InvalidGenerationException.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\JoinGroupRequestHandler.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\JoinGroupRequestPayload.java
@@ -59,6 +62,7 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\Fetc
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\FetchTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\GenerationRebalanceTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\GroupMemberTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\HeartbeatRequestPayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\JoinGroupCoordinatorTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\JoinGroupPayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\JoinGroupRequestHandlerTest.java
