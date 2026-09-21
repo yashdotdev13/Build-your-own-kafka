@@ -65,6 +65,7 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\Grou
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\HeartbeatDispatcherTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\HeartbeatRequestHandlerTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\HeartbeatRequestPayloadTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\HeartbeatTcpTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\JoinGroupCoordinatorTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\JoinGroupPayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\JoinGroupRequestHandlerTest.java

@@ -66,6 +66,7 @@ com\buildyourownkafka\client\GenerationRebalanceTest.class
 com\buildyourownkafka\client\SyncGroupDispatcherTest.class
 com\buildyourownkafka\client\ConsumerAutomaticRejoinTest.class
 com\buildyourownkafka\broker\ConsumerGroupCoordinator.class
+com\buildyourownkafka\client\HeartbeatTcpTest.class
 com\buildyourownkafka\broker\BrokerServer.class
 com\buildyourownkafka\client\FetchTest.class
 com\buildyourownkafka\client\JoinGroupCoordinatorTest.class
