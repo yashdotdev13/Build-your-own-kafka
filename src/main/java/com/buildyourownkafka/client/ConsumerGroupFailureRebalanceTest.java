@@ -11,232 +11,73 @@ public class ConsumerGroupFailureRebalanceTest {
 
     public static void main(String[] args) {
 
-        System.out.println(
-                "=== CONSUMER GROUP FAILURE REBALANCE TEST ==="
-        );
+        System.out.println("=== CONSUMER GROUP FAILURE REBALANCE TEST ===");
 
         String groupId = "failure-rebalance-group";
         int partitionCount = 4;
 
-        ConsumerGroupManager manager =
-                new ConsumerGroupManager();
-
-        ConsumerGroupCoordinator coordinator =
-                new ConsumerGroupCoordinator(
-                        manager,
-                        5000
-                );
+        ConsumerGroupManager manager = new ConsumerGroupManager();
+        ConsumerGroupCoordinator coordinator = new ConsumerGroupCoordinator(manager, 5000);
 
         System.out.println();
         System.out.println("=== JOIN GROUP ===");
 
-        JoinGroupResult resultA =
-                coordinator.joinGroup(
-                        groupId,
-                        "consumer-A",
-                        partitionCount
-                );
+        JoinGroupResult resultA = coordinator.joinGroup(groupId, "consumer-A", partitionCount);
+        JoinGroupResult resultB = coordinator.joinGroup(groupId, "consumer-B", partitionCount);
+        JoinGroupResult resultC = coordinator.joinGroup(groupId, "consumer-C", partitionCount);
 
-        JoinGroupResult resultB =
-                coordinator.joinGroup(
-                        groupId,
-                        "consumer-B",
-                        partitionCount
-                );
+        ConsumerGroup group = manager.getGroup(groupId);
 
-        JoinGroupResult resultC =
-                coordinator.joinGroup(
-                        groupId,
-                        "consumer-C",
-                        partitionCount
-                );
-
-        ConsumerGroup group =
-                manager.getGroup(groupId);
-
-        System.out.println(
-                "Members: "
-                        + group.memberCount()
-        );
-
-        System.out.println(
-                "Current generation: "
-                        + group.generation()
-        );
+        System.out.println("Members: " + group.memberCount());
+        System.out.println("Current generation: " + group.generation());
 
         System.out.println();
-        System.out.println(
-                "=== INITIAL ASSIGNMENT ==="
-        );
+        System.out.println("=== INITIAL ASSIGNMENT ===");
 
-        PartitionAssignment initialAssignment =
-                coordinator.getAssignment(groupId);
-
-        System.out.println(
-                "Consumer A: "
-                        + initialAssignment.partitionsFor(
-                        "consumer-A"
-                )
-        );
-
-        System.out.println(
-                "Consumer B: "
-                        + initialAssignment.partitionsFor(
-                        "consumer-B"
-                )
-        );
-
-        System.out.println(
-                "Consumer C: "
-                        + initialAssignment.partitionsFor(
-                        "consumer-C"
-                )
-        );
-
-        /*
-         * Make Consumer A appear to have stopped
-         * sending heartbeats.
-         *
-         * Consumer B and C will receive fresh
-         * heartbeats below.
-         */
+        PartitionAssignment initialAssignment = coordinator.getAssignment(groupId);
+        System.out.println("Consumer A: " + initialAssignment.partitionsFor("consumer-A"));
+        System.out.println("Consumer B: " + initialAssignment.partitionsFor("consumer-B"));
+        System.out.println("Consumer C: " + initialAssignment.partitionsFor("consumer-C"));
         long now = System.currentTimeMillis();
 
-        GroupMember expiredConsumerA =
-                new GroupMember(
-                        "consumer-A",
-                        groupId,
-                        group.generation(),
-                        initialAssignment.partitionsFor(
-                                "consumer-A"
-                        ),
-                        now - 10_000
-                );
+        GroupMember expiredConsumerA = new GroupMember("consumer-A", groupId, group.generation(), initialAssignment.partitionsFor("consumer-A"), now - 10_000);
 
         group.addMember(expiredConsumerA);
+        coordinator.heartbeat(groupId, "consumer-B");
 
-        /*
-         * Keep B and C alive.
-         */
-        coordinator.heartbeat(
-                groupId,
-                "consumer-B"
-        );
-
-        coordinator.heartbeat(
-                groupId,
-                "consumer-C"
-        );
-
-        /*
-         * A is expired at this time.
-         *
-         * B and C are still within the
-         * 5-second session timeout.
-         */
+        coordinator.heartbeat(groupId, "consumer-C");
         long checkTime = now + 4_000;
 
         System.out.println();
-        System.out.println(
-                "=== FAILURE DETECTION ==="
-        );
+        System.out.println("=== FAILURE DETECTION ===");
 
-        System.out.println(
-                "Expired members: "
-                        + coordinator.findExpiredMembers(
-                        groupId,
-                        checkTime
-                )
-        );
-
-        /*
-         * Remove expired member and rebalance.
-         */
-        PartitionAssignment newAssignment =
-                coordinator.removeExpiredMembers(
-                        groupId,
-                        partitionCount,
-                        checkTime
-                );
+        System.out.println("Expired members: " + coordinator.findExpiredMembers(groupId, checkTime));
+        PartitionAssignment newAssignment = coordinator.removeExpiredMembers(groupId, partitionCount, checkTime);
 
         System.out.println();
-        System.out.println(
-                "=== AFTER FAILURE REBALANCE ==="
-        );
+        System.out.println("=== AFTER FAILURE REBALANCE ===");
 
-        System.out.println(
-                "Members remaining: "
-                        + group.memberCount()
-        );
-
-        System.out.println(
-                "New generation: "
-                        + group.generation()
-        );
+        System.out.println("Members remaining: " + group.memberCount());
+        System.out.println("New generation: " + group.generation());
 
         if (newAssignment == null) {
-            throw new RuntimeException(
-                    "New assignment should not be null"
-            );
+            throw new RuntimeException("New assignment should not be null");
         }
-
-        System.out.println(
-                "Consumer B: "
-                        + newAssignment.partitionsFor(
-                        "consumer-B"
-                )
-        );
-
-        System.out.println(
-                "Consumer C: "
-                        + newAssignment.partitionsFor(
-                        "consumer-C"
-                )
-        );
-
-        /*
-         * Verify Consumer A was removed.
-         */
+        System.out.println("Consumer B: " + newAssignment.partitionsFor("consumer-B"));
+        System.out.println("Consumer C: " + newAssignment.partitionsFor("consumer-C"));
         if (group.hasMember("consumer-A")) {
-            throw new RuntimeException(
-                    "Consumer A should have been removed"
-            );
+            throw new RuntimeException("Consumer A should have been removed");
         }
-
-        /*
-         * Verify B and C remain.
-         */
-        if (!group.hasMember("consumer-B")
-                || !group.hasMember("consumer-C")) {
-
-            throw new RuntimeException(
-                    "Consumer B and C should remain"
-            );
+        if (!group.hasMember("consumer-B") || !group.hasMember("consumer-C")) {
+            throw new RuntimeException("Consumer B and C should remain");
         }
-
-        /*
-         * Verify all partitions were reassigned.
-         */
-        if (newAssignment.partitionCount()
-                != partitionCount) {
-
-            throw new RuntimeException(
-                    "All partitions should be reassigned"
-            );
+        if (newAssignment.partitionCount() != partitionCount) {
+            throw new RuntimeException("All partitions should be reassigned");
         }
-
-        /*
-         * Verify generation increased.
-         */
         if (group.generation() <= resultC.generation()) {
-            throw new RuntimeException(
-                    "Generation should increase after failure rebalance"
-            );
+            throw new RuntimeException("Generation should increase after failure rebalance");
         }
-
         System.out.println();
-        System.out.println(
-                "CONSUMER FAILURE REBALANCE VERIFIED!"
-        );
+        System.out.println("CONSUMER FAILURE REBALANCE VERIFIED!");
     }
 }
