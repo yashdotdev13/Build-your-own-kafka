@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class FetchRequestHandler implements RequestHandler {
+
     private final TopicManager topicManager;
 
     public FetchRequestHandler(TopicManager topicManager) {
@@ -17,28 +18,59 @@ public class FetchRequestHandler implements RequestHandler {
 
     @Override
     public Response handle(Request request) {
+
         try {
+
             // 1. Decode FETCH payload
-            FetchPayload payload = FetchPayload.decode(request.payload());
+            FetchPayload payload =
+                    FetchPayload.decode(request.payload());
+
             // 2. Find topic
-            Topic topic = topicManager.getTopic(payload.topicName());
+            Topic topic =
+                    topicManager.getTopic(payload.topicName());
 
             if (topic == null) {
-                return new Response(request.correlationId(), Response.ERROR, ("Topic does not exist: " + payload.topicName()).getBytes(StandardCharsets.UTF_8));
+
+                return new Response(
+                        request.correlationId(),
+                        Response.ERROR,
+                        (
+                                "Topic does not exist: "
+                                        + payload.topicName()
+                        ).getBytes(StandardCharsets.UTF_8)
+                );
             }
+
             // 3. Find partition
-            Partition partition = topic.getPartition(payload.partitionId());
+            Partition partition =
+                    topic.getPartition(payload.partitionId());
 
             // 4. Read records from requested offset
-            List<Record> records = partition.readFrom(payload.offset());
+            //    with the requested batch limit
+            List<Record> records =
+                    partition.readFrom(
+                            payload.offset(),
+                            payload.maxRecords()
+                    );
 
             // 5. Create response payload
-            FetchResponsePayload responsePayload = new FetchResponsePayload(records);
+            FetchResponsePayload responsePayload =
+                    new FetchResponsePayload(records);
 
             // 6. Return response
-            return new Response(request.correlationId(), Response.SUCCESS, responsePayload.encode());
+            return new Response(
+                    request.correlationId(),
+                    Response.SUCCESS,
+                    responsePayload.encode()
+            );
+
         } catch (IllegalArgumentException e) {
-            return new Response(request.correlationId(), Response.ERROR, e.getMessage().getBytes(StandardCharsets.UTF_8));
+
+            return new Response(
+                    request.correlationId(),
+                    Response.ERROR,
+                    e.getMessage().getBytes(StandardCharsets.UTF_8)
+            );
         }
     }
 }

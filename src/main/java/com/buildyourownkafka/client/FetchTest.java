@@ -19,75 +19,234 @@ public class FetchTest {
     public static void main(String[] args) throws Exception {
 
         try (Socket socket = new Socket("localhost", 9092)) {
-            DataInputStream input = new DataInputStream(socket.getInputStream());
-            DataOutputStream output = new DataOutputStream(socket.getOutputStream());
-            RequestEncoder requestEncoder = new RequestEncoder(output);
-            ResponseDecoder responseDecoder = new ResponseDecoder(input);
+
+            DataInputStream input =
+                    new DataInputStream(socket.getInputStream());
+
+            DataOutputStream output =
+                    new DataOutputStream(socket.getOutputStream());
+
+            RequestEncoder requestEncoder =
+                    new RequestEncoder(output);
+
+            ResponseDecoder responseDecoder =
+                    new ResponseDecoder(input);
+
             System.out.println("Connected to broker.");
 
+            CreateTopicPayload topicPayload =
+                    new CreateTopicPayload("orders", 3);
 
-            CreateTopicPayload topicPayload = new CreateTopicPayload("orders", 3);
-            Request createTopicRequest = new Request(Request.CREATE_TOPIC, (short) 1, 100, topicPayload.encode());
+            Request createTopicRequest =
+                    new Request(
+                            Request.CREATE_TOPIC,
+                            (short) 1,
+                            100,
+                            topicPayload.encode()
+                    );
+
             requestEncoder.encode(createTopicRequest);
-            Response createTopicResponse = responseDecoder.decode();
+
+            Response createTopicResponse =
+                    responseDecoder.decode();
 
             System.out.println();
             System.out.println("CREATE_TOPIC RESPONSE");
-
             System.out.println("Status: " + createTopicResponse.status());
 
-            produce(requestEncoder, responseDecoder, "orders", 1, "order-123", 101);
-            produce(requestEncoder, responseDecoder, "orders", 1, "order-456", 102);
-            produce(requestEncoder, responseDecoder, "orders", 1, "order-789", 103);
+            produce(
+                    requestEncoder,
+                    responseDecoder,
+                    "orders",
+                    1,
+                    "order-123",
+                    101
+            );
 
-            fetch(requestEncoder, responseDecoder, "orders", 1, 0, 200);
-            fetch(requestEncoder, responseDecoder, "orders", 1, 1, 201);
+            produce(
+                    requestEncoder,
+                    responseDecoder,
+                    "orders",
+                    1,
+                    "order-456",
+                    102
+            );
 
-            fetch(requestEncoder, responseDecoder, "orders", 1, 2, 202);
-            fetch(requestEncoder, responseDecoder, "orders", 1, 3, 203);
+            produce(
+                    requestEncoder,
+                    responseDecoder,
+                    "orders",
+                    1,
+                    "order-789",
+                    103
+            );
+
+            fetch(
+                    requestEncoder,
+                    responseDecoder,
+                    "orders",
+                    1,
+                    0,
+                    2,
+                    200
+            );
+
+            fetch(
+                    requestEncoder,
+                    responseDecoder,
+                    "orders",
+                    1,
+                    1,
+                    2,
+                    201
+            );
+
+            fetch(
+                    requestEncoder,
+                    responseDecoder,
+                    "orders",
+                    1,
+                    2,
+                    2,
+                    202
+            );
+
+            fetch(
+                    requestEncoder,
+                    responseDecoder,
+                    "orders",
+                    1,
+                    3,
+                    2,
+                    203
+            );
         }
     }
 
-    private static void produce(RequestEncoder requestEncoder, ResponseDecoder responseDecoder, String topic, int partition, String value, int correlationId) throws Exception {
+    private static void produce(
+            RequestEncoder requestEncoder,
+            ResponseDecoder responseDecoder,
+            String topic,
+            int partition,
+            String value,
+            int correlationId
+    ) throws Exception {
 
-        ProducePayload payload = new ProducePayload(topic, partition, value.getBytes(StandardCharsets.UTF_8));
-        Request request = new Request(Request.PRODUCE, (short) 1, correlationId, payload.encode());
+        ProducePayload payload =
+                new ProducePayload(
+                        topic,
+                        partition,
+                        value.getBytes(StandardCharsets.UTF_8)
+                );
+
+        Request request =
+                new Request(
+                        Request.PRODUCE,
+                        (short) 1,
+                        correlationId,
+                        payload.encode()
+                );
+
         requestEncoder.encode(request);
-        Response response = responseDecoder.decode();
+
+        Response response =
+                responseDecoder.decode();
 
         if (response.status() != Response.SUCCESS) {
-            System.out.println("PRODUCE failed: " + new String(response.payload(), StandardCharsets.UTF_8));
+
+            System.out.println(
+                    "PRODUCE failed: "
+                            + new String(
+                            response.payload(),
+                            StandardCharsets.UTF_8
+                    )
+            );
+
             return;
         }
 
         System.out.println();
         System.out.println("PRODUCE");
         System.out.println("Value: " + value);
-        System.out.println("Correlation ID: " + response.correlationId());
+        System.out.println(
+                "Correlation ID: " + response.correlationId()
+        );
         System.out.println("Status: " + response.status());
     }
 
-    private static void fetch(RequestEncoder requestEncoder, ResponseDecoder responseDecoder, String topic, int partition, long offset, int correlationId) throws Exception {
+    private static void fetch(
+            RequestEncoder requestEncoder,
+            ResponseDecoder responseDecoder,
+            String topic,
+            int partition,
+            long offset,
+            int maxRecords,
+            int correlationId
+    ) throws Exception {
 
-        FetchPayload payload = new FetchPayload(topic, partition, offset);
-        Request request = new Request(Request.FETCH, (short) 1, correlationId, payload.encode());
+        FetchPayload payload =
+                new FetchPayload(
+                        topic,
+                        partition,
+                        offset,
+                        maxRecords
+                );
+
+        Request request =
+                new Request(
+                        Request.FETCH,
+                        (short) 1,
+                        correlationId,
+                        payload.encode()
+                );
+
         requestEncoder.encode(request);
-        Response response = responseDecoder.decode();
+
+        Response response =
+                responseDecoder.decode();
 
         System.out.println();
         System.out.println("FETCH");
         System.out.println("Requested offset: " + offset);
-        System.out.println("Correlation ID: " + response.correlationId());
+        System.out.println("Max records: " + maxRecords);
+        System.out.println(
+                "Correlation ID: " + response.correlationId()
+        );
         System.out.println("Status: " + response.status());
 
         if (response.status() != Response.SUCCESS) {
-            System.out.println("Error: " + new String(response.payload(), StandardCharsets.UTF_8));
+
+            System.out.println(
+                    "Error: "
+                            + new String(
+                            response.payload(),
+                            StandardCharsets.UTF_8
+                    )
+            );
+
             return;
         }
-        FetchResponsePayload responsePayload = FetchResponsePayload.decode(response.payload());
-        System.out.println("Records returned: " + responsePayload.records().size());
-        for (com.buildyourownkafka.broker.Record record : responsePayload.records()) {
-            System.out.println("Offset " + record.offset() + " -> " + new String(record.value(), StandardCharsets.UTF_8));
+
+        FetchResponsePayload responsePayload =
+                FetchResponsePayload.decode(response.payload());
+
+        System.out.println(
+                "Records returned: "
+                        + responsePayload.records().size()
+        );
+
+        for (com.buildyourownkafka.broker.Record record
+                : responsePayload.records()) {
+
+            System.out.println(
+                    "Offset "
+                            + record.offset()
+                            + " -> "
+                            + new String(
+                            record.value(),
+                            StandardCharsets.UTF_8
+                    )
+            );
         }
     }
 }
