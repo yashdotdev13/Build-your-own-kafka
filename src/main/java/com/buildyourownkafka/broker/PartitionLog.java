@@ -56,6 +56,40 @@ public class PartitionLog {
         }
         return null;
     }
+
+    public synchronized List<Record> readFrom(
+            long offset,
+            int maxRecords
+    ) {
+        if (offset < 0) {
+            throw new IllegalArgumentException(
+                    "Offset cannot be negative"
+            );
+        }
+
+        if (maxRecords <= 0) {
+            throw new IllegalArgumentException(
+                    "Max records must be greater than zero"
+            );
+        }
+
+        List<Record> records = new ArrayList<>();
+
+        for (long currentOffset = offset;
+             records.size() < maxRecords;
+             currentOffset++) {
+
+            Record record = read(currentOffset);
+
+            if (record == null) {
+                break;
+            }
+
+            records.add(record);
+        }
+
+        return records;
+    }
     public synchronized long nextOffset() {
         if (segments.isEmpty()) {
             return 0;
