@@ -84,6 +84,7 @@ com\buildyourownkafka\protocol\FetchOffsetPayload.class
 com\buildyourownkafka\client\ConsumerGroupGenerationTest.class
 com\buildyourownkafka\client\ConsumerGroupFailureRebalanceTest.class
 com\buildyourownkafka\client\ConsumerHeartbeatFailureTest.class
+com\buildyourownkafka\client\FetchBatchLimitTest.class
 com\buildyourownkafka\client\FetchResponsePayloadTest.class
 com\buildyourownkafka\client\HeartbeatRequestPayloadTest.class
 com\buildyourownkafka\client\SyncGroupResponsePayloadTest.class
