@@ -59,6 +59,7 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\Cons
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerPollTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerSyncGroupTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ConsumerTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\FetchBatchLimitTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\FetchOffsetResponsePayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\FetchPayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\FetchResponsePayloadTest.java

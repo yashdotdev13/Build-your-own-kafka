@@ -8,77 +8,158 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
-public record FetchPayload(String topicName, int partitionId, long offset) {
+public record FetchPayload(
+        String topicName,
+        int partitionId,
+        long offset,
+        int maxRecords
+) {
 
     public FetchPayload {
 
         if (topicName == null || topicName.isBlank()) {
-            throw new IllegalArgumentException("Topic name cannot be null or blank");
+            throw new IllegalArgumentException(
+                    "Topic name cannot be null or blank"
+            );
         }
+
         if (partitionId < 0) {
-            throw new IllegalArgumentException("Partition id cannot be negative");
+            throw new IllegalArgumentException(
+                    "Partition id cannot be negative"
+            );
         }
+
         if (offset < 0) {
-            throw new IllegalArgumentException("Offset cannot be negative");
+            throw new IllegalArgumentException(
+                    "Offset cannot be negative"
+            );
+        }
+
+        if (maxRecords <= 0) {
+            throw new IllegalArgumentException(
+                    "Max records must be greater than zero"
+            );
         }
     }
+
     public byte[] encode() {
 
         try {
 
             ByteArrayOutputStream output = new ByteArrayOutputStream();
             DataOutputStream data = new DataOutputStream(output);
-            byte[] topicBytes = topicName.getBytes(StandardCharsets.UTF_8);
+
+            byte[] topicBytes =
+                    topicName.getBytes(StandardCharsets.UTF_8);
 
             data.writeInt(topicBytes.length);
             data.write(topicBytes);
+
             data.writeInt(partitionId);
+
             data.writeLong(offset);
+
+            data.writeInt(maxRecords);
+
             data.flush();
+
             return output.toByteArray();
 
         } catch (IOException e) {
 
-            throw new IllegalStateException("Failed to encode FETCH payload", e);
+            throw new IllegalStateException(
+                    "Failed to encode FETCH payload",
+                    e
+            );
         }
     }
 
     public static FetchPayload decode(byte[] bytes) {
+
         if (bytes == null) {
-            throw new IllegalArgumentException("Payload cannot be null");
+            throw new IllegalArgumentException(
+                    "Payload cannot be null"
+            );
         }
 
         try {
-            ByteArrayInputStream input = new ByteArrayInputStream(bytes);
 
-            DataInputStream data = new DataInputStream(input);
+            ByteArrayInputStream input =
+                    new ByteArrayInputStream(bytes);
 
+            DataInputStream data =
+                    new DataInputStream(input);
+
+            // Topic name
             int topicLength = data.readInt();
+
             if (topicLength <= 0 || topicLength > 255) {
-                throw new IllegalArgumentException("Invalid topic name length: " + topicLength);
+                throw new IllegalArgumentException(
+                        "Invalid topic name length: " + topicLength
+                );
             }
 
             byte[] topicBytes = new byte[topicLength];
+
             data.readFully(topicBytes);
-            String topicName = new String(topicBytes, StandardCharsets.UTF_8);
+
+            String topicName =
+                    new String(topicBytes, StandardCharsets.UTF_8);
+
+            // Partition
             int partitionId = data.readInt();
 
             if (partitionId < 0) {
-                throw new IllegalArgumentException("Partition id cannot be negative");
+                throw new IllegalArgumentException(
+                        "Partition id cannot be negative"
+                );
             }
+
+            // Offset
             long offset = data.readLong();
+
             if (offset < 0) {
-                throw new IllegalArgumentException("Offset cannot be negative");
+                throw new IllegalArgumentException(
+                        "Offset cannot be negative"
+                );
             }
+
+            // Maximum number of records
+            int maxRecords = data.readInt();
+
+            if (maxRecords <= 0) {
+                throw new IllegalArgumentException(
+                        "Max records must be greater than zero"
+                );
+            }
+
+            // Make sure there is no unexpected data
             if (data.available() != 0) {
-                throw new IllegalArgumentException("Unexpected trailing bytes in FETCH payload");
+                throw new IllegalArgumentException(
+                        "Unexpected trailing bytes in FETCH payload"
+                );
             }
-            return new FetchPayload(topicName, partitionId, offset);
+
+            return new FetchPayload(
+                    topicName,
+                    partitionId,
+                    offset,
+                    maxRecords
+            );
 
         } catch (EOFException e) {
-            throw new IllegalArgumentException("Invalid FETCH payload", e);
+
+            throw new IllegalArgumentException(
+                    "Invalid FETCH payload",
+                    e
+            );
+
         } catch (IOException e) {
-            throw new IllegalArgumentException("Failed to decode FETCH payload", e);
+
+            throw new IllegalArgumentException(
+                    "Failed to decode FETCH payload",
+                    e
+            );
         }
     }
 }
