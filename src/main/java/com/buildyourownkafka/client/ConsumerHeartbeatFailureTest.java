@@ -33,7 +33,6 @@ public class ConsumerHeartbeatFailureTest {
         System.out.println("Simulating consumer failure...");
 
         consumer.close();
-
         System.out.println("Consumer connection lost.");
 
         /*
