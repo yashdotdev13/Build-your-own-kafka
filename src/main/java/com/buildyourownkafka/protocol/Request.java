@@ -17,4 +17,5 @@ public record Request(
     public static final int SYNC_GROUP = 8;
     public static final int LEAVE_GROUP = 9;
     public static final int HEARTBEAT = 10;
+    public static final int METADATA = 11;
 }
