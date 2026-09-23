@@ -24,6 +24,7 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Leav
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\LeaveGroupRequestPayload.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\LeaveGroupResponsePayload.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\LogSegment.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\MetadataRequestHandler.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Partition.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\PartitionAssigner.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\PartitionAssignment.java
@@ -82,6 +83,7 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\Leav
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\LeaveGroupRequestPayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\LeaveGroupResponsePayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\LeaveGroupTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\MetadataTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\MultiConsumerJoinGroupTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\MultiConsumerSyncGroupTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\OffsetHandlerTest.java
@@ -118,6 +120,8 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\protocol\Fe
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\protocol\Frame.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\protocol\FrameDecoder.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\protocol\FrameEncoder.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\protocol\MetadataPayload.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\protocol\MetadataResponsePayload.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\protocol\ProducePayload.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\protocol\ProduceResponsePayload.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\protocol\Request.java

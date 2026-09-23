@@ -18,7 +18,7 @@ public class LeaveGroupFailureTest {
 
     public static void main(String[] args) throws Exception {
 
-        System.out.println("=== LEAVE GROUP INVALID MEMBER TEST ===");ii
+        System.out.println("=== LEAVE GROUP INVALID MEMBER TEST ===");
         ConsumerGroupManager groupManager = new ConsumerGroupManager();
         ConsumerGroupCoordinator coordinator = new ConsumerGroupCoordinator(groupManager);
 

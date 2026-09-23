@@ -16,9 +16,11 @@ com\buildyourownkafka\protocol\FrameEncoder.class
 com\buildyourownkafka\client\LeaveGroupTest.class
 com\buildyourownkafka\broker\InvalidGenerationException.class
 com\buildyourownkafka\client\SyncGroupRequestPayloadTest.class
+com\buildyourownkafka\protocol\MetadataPayload.class
 com\buildyourownkafka\client\SyncGroupCoordinatorTest.class
 com\buildyourownkafka\broker\ConsumerGroupState.class
 com\buildyourownkafka\client\JoinGroupPayloadTest.class
+com\buildyourownkafka\protocol\MetadataResponsePayload.class
 com\buildyourownkafka\broker\JoinGroupRequestPayload.class
 com\buildyourownkafka\broker\FetchRequestHandler.class
 com\buildyourownkafka\client\JoinGroupRequestHandlerTest.class
@@ -29,6 +31,7 @@ com\buildyourownkafka\protocol\FrameDecoder.class
 com\buildyourownkafka\client\ConsumerHeartbeatTest.class
 com\buildyourownkafka\client\ProduceResponsePayloadTest.class
 com\buildyourownkafka\broker\ConsumerGroupManager.class
+com\buildyourownkafka\broker\MetadataRequestHandler.class
 com\buildyourownkafka\broker\RequestHandler.class
 com\buildyourownkafka\protocol\FetchPayload.class
 com\buildyourownkafka\broker\ConsumerGroup.class
@@ -105,6 +108,7 @@ com\buildyourownkafka\client\ConsumerGroupHeartbeatTest.class
 com\buildyourownkafka\broker\JoinGroupRequestHandler.class
 com\buildyourownkafka\client\LeaveGroupDispatcherTest.class
 com\buildyourownkafka\broker\ProduceRequestHandler.class
+com\buildyourownkafka\client\MetadataTest.class
 com\buildyourownkafka\client\ProducePayloadTest.class
 com\buildyourownkafka\client\ConsumerSyncGroupTest.class
 com\buildyourownkafka\client\OffsetHandlerTest.class

@@ -33,6 +33,10 @@ public class RequestDispatcher {
                         consumerGroupCoordinator
                 )
         );
+        register(
+                Request.METADATA,
+                new MetadataRequestHandler(topicManager)
+        );
     }
 
     private void register(int requestType, RequestHandler handler) {
