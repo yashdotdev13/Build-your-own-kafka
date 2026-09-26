@@ -58,6 +58,7 @@ public class LeaveGroupFailureTest {
         if (membersAfter != 2) {
             throw new AssertionError("Invalid leave modified group membership");
         }
+
         if (!groupManager.getGroup("orders-group").hasMember("consumer-A")) {
             throw new AssertionError("Consumer-A should still be present");
         }
