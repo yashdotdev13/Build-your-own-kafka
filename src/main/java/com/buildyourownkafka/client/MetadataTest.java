@@ -147,7 +147,6 @@ public class MetadataTest {
 
             if (!responsePayload.partitionIds()
                     .equals(expected)) {
-
                 throw new AssertionError(
                         "Incorrect partition IDs: "
                                 + responsePayload.partitionIds()
