@@ -9,6 +9,7 @@ com\buildyourownkafka\client\ConsumerGroupFailureDetectorTest.class
 com\buildyourownkafka\client\GroupMemberTest.class
 com\buildyourownkafka\broker\RequestDispatcher.class
 com\buildyourownkafka\client\PartitionLogSegmentTest.class
+com\buildyourownkafka\client\ProduceBatchPayloadTest.class
 com\buildyourownkafka\broker\GroupMember.class
 com\buildyourownkafka\client\RecoveryProduceTest.class
 com\buildyourownkafka\Main.class
@@ -22,6 +23,7 @@ com\buildyourownkafka\broker\ConsumerGroupState.class
 com\buildyourownkafka\client\JoinGroupPayloadTest.class
 com\buildyourownkafka\protocol\MetadataResponsePayload.class
 com\buildyourownkafka\broker\JoinGroupRequestPayload.class
+com\buildyourownkafka\broker\ProduceBatchRequestHandler.class
 com\buildyourownkafka\broker\FetchRequestHandler.class
 com\buildyourownkafka\client\JoinGroupRequestHandlerTest.class
 com\buildyourownkafka\client\ConsumerGroupRejoinTest.class
@@ -39,6 +41,7 @@ com\buildyourownkafka\protocol\FetchOffsetResponsePayload.class
 com\buildyourownkafka\client\ConsumerCommitTest.class
 com\buildyourownkafka\client\ConsumerOffsetStoreTest.class
 com\buildyourownkafka\broker\Topic.class
+com\buildyourownkafka\client\ProduceBatchTest.class
 com\buildyourownkafka\broker\HeartbeatRequestHandler.class
 com\buildyourownkafka\client\PartitionAssignerTest.class
 com\buildyourownkafka\client\PartitionAssignmentTest.class
@@ -54,6 +57,7 @@ com\buildyourownkafka\client\ProduceTest.class
 com\buildyourownkafka\protocol\ProducePayload.class
 com\buildyourownkafka\client\JoinGroupResponsePayloadTest.class
 com\buildyourownkafka\broker\PingRequestHandler.class
+com\buildyourownkafka\protocol\ProduceBatchPayload.class
 com\buildyourownkafka\broker\PartitionAssignment.class
 com\buildyourownkafka\protocol\ProduceResponsePayload.class
 com\buildyourownkafka\client\ConsumerGroupCoordinatorTest.class
@@ -71,6 +75,7 @@ com\buildyourownkafka\client\SyncGroupDispatcherTest.class
 com\buildyourownkafka\client\ConsumerAutomaticRejoinTest.class
 com\buildyourownkafka\broker\ConsumerGroupCoordinator.class
 com\buildyourownkafka\client\HeartbeatTcpTest.class
+com\buildyourownkafka\protocol\ProduceBatchResponsePayload.class
 com\buildyourownkafka\broker\BrokerServer.class
 com\buildyourownkafka\client\FetchTest.class
 com\buildyourownkafka\client\JoinGroupCoordinatorTest.class
@@ -97,6 +102,7 @@ com\buildyourownkafka\client\Consumer.class
 com\buildyourownkafka\broker\ClientConnection.class
 com\buildyourownkafka\broker\SyncGroupRequestPayload.class
 com\buildyourownkafka\protocol\Response.class
+com\buildyourownkafka\client\ProduceBatchResponsePayloadTest.class
 com\buildyourownkafka\client\MultiConsumerSyncGroupTest.class
 com\buildyourownkafka\broker\FetchOffsetRequestHandler.class
 com\buildyourownkafka\broker\HeartbeatRequestPayload.class

@@ -15,28 +15,15 @@ public class RequestDispatcher {
         register(Request.PING, new PingRequestHandler());
         register(Request.CREATE_TOPIC, new CreateTopicRequestHandler(topicManager));
         register(Request.PRODUCE, new ProduceRequestHandler(topicManager));
+        register(Request.PRODUCE_BATCH, new ProduceBatchRequestHandler(topicManager));
         register(Request.FETCH, new FetchRequestHandler(topicManager));
         register(Request.COMMIT_OFFSET, new CommitOffsetRequestHandler(consumerOffsetStore));
         register(Request.FETCH_OFFSET, new FetchOffsetRequestHandler(consumerOffsetStore));
         register(Request.JOIN_GROUP, new JoinGroupRequestHandler(consumerGroupCoordinator));
-        register(
-                Request.SYNC_GROUP,
-                new SyncGroupRequestHandler(consumerGroupCoordinator)
-        );
-        register(
-                Request.LEAVE_GROUP,
-                new LeaveGroupRequestHandler(consumerGroupCoordinator)
-        );
-        register(
-                Request.HEARTBEAT,
-                new HeartbeatRequestHandler(
-                        consumerGroupCoordinator
-                )
-        );
-        register(
-                Request.METADATA,
-                new MetadataRequestHandler(topicManager)
-        );
+        register(Request.SYNC_GROUP, new SyncGroupRequestHandler(consumerGroupCoordinator));
+        register(Request.LEAVE_GROUP, new LeaveGroupRequestHandler(consumerGroupCoordinator));
+        register(Request.HEARTBEAT, new HeartbeatRequestHandler(consumerGroupCoordinator));
+        register(Request.METADATA, new MetadataRequestHandler(topicManager));
     }
 
     private void register(int requestType, RequestHandler handler) {
