@@ -30,6 +30,7 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Part
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\PartitionAssignment.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\PartitionLog.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\PingRequestHandler.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\ProduceBatchRequestHandler.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\ProduceRequestHandler.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\Record.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\broker\RequestDispatcher.java
@@ -96,6 +97,7 @@ E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\Part
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\PartitionTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ProduceBatchPayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ProduceBatchResponsePayloadTest.java
+E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ProduceBatchTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ProducePayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ProduceResponsePayloadTest.java
 E:\projects\Build-your-own-kafka\src\main\java\com\buildyourownkafka\client\ProduceTest.java

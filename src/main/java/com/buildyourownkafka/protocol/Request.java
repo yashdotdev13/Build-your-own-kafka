@@ -18,4 +18,6 @@ public record Request(
     public static final int LEAVE_GROUP = 9;
     public static final int HEARTBEAT = 10;
     public static final int METADATA = 11;
+
+    public static final int PRODUCE_BATCH = 12;
 }
