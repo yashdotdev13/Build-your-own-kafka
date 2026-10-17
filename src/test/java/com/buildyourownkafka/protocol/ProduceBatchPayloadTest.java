@@ -11,19 +11,9 @@ class ProduceBatchPayloadTest {
 
     @Test
     void shouldEncodeAndDecodeBatchPayload() {
-        ProduceBatchPayload original = new ProduceBatchPayload(
-                "orders",
-                1,
-                List.of(
-                        bytes("order-101"),
-                        bytes("order-102"),
-                        bytes("order-103")
-                )
-        );
-
-        ProduceBatchPayload decoded =
-                ProduceBatchPayload.decode(original.encode());
-
+        ProduceBatchPayload original = new ProduceBatchPayload("orders", 1,
+                List.of(bytes("order-101"), bytes("order-102"), bytes("order-103")));
+        ProduceBatchPayload decoded = ProduceBatchPayload.decode(original.encode());
         assertEquals("orders", decoded.topicName());
         assertEquals(1, decoded.partitionId());
         assertEquals(3, decoded.records().size());
@@ -35,105 +25,55 @@ class ProduceBatchPayloadTest {
 
     @Test
     void shouldSupportEmptyRecordValues() {
-        ProduceBatchPayload original = new ProduceBatchPayload(
-                "orders",
-                0,
-                List.of(new byte[0])
-        );
-
-        ProduceBatchPayload decoded =
-                ProduceBatchPayload.decode(original.encode());
-
+        ProduceBatchPayload original = new ProduceBatchPayload("orders", 0, List.of(new byte[0]));
+        ProduceBatchPayload decoded = ProduceBatchPayload.decode(original.encode());
         assertEquals(1, decoded.records().size());
         assertEquals(0, decoded.records().get(0).length);
     }
-
     @Test
     void shouldRejectBlankTopicName() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> new ProduceBatchPayload(" ", 0, List.of(bytes("order")))
-        );
+        assertThrows(IllegalArgumentException.class, () -> new ProduceBatchPayload(" ", 0,
+                List.of(bytes("order"))));
     }
-
     @Test
     void shouldRejectNegativePartitionId() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> new ProduceBatchPayload("orders", -1, List.of(bytes("order")))
-        );
+        assertThrows(IllegalArgumentException.class, () -> new ProduceBatchPayload("orders", -1,
+                List.of(bytes("order"))));
     }
-
     @Test
     void shouldRejectEmptyBatch() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> new ProduceBatchPayload("orders", 0, List.of())
-        );
+        assertThrows(IllegalArgumentException.class, () -> new ProduceBatchPayload("orders", 0,
+                List.of()));
     }
-
     @Test
     void shouldRejectNullRecordsList() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> new ProduceBatchPayload("orders", 0, null)
-        );
+        assertThrows(IllegalArgumentException.class, () -> new ProduceBatchPayload("orders", 0,
+                null));
     }
 
     @Test
     void shouldRejectNullRecordValue() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> new ProduceBatchPayload(
-                        "orders",
-                        0,
-                        java.util.Arrays.asList((byte[]) null)
-                )
-        );
+        assertThrows(IllegalArgumentException.class, () -> new ProduceBatchPayload("orders", 0,
+                java.util.Arrays.asList((byte[]) null)));
     }
-
     @Test
     void shouldRejectNullEncodedPayload() {
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> ProduceBatchPayload.decode(null)
-        );
+        assertThrows(IllegalArgumentException.class, () -> ProduceBatchPayload.decode(null));
     }
-
     @Test
     void shouldRejectTruncatedPayload() {
-        byte[] encoded = new ProduceBatchPayload(
-                "orders",
-                0,
-                List.of(bytes("order-101"))
-        ).encode();
-
-        byte[] truncated = java.util.Arrays.copyOf(
-                encoded,
-                encoded.length - 1
-        );
-
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> ProduceBatchPayload.decode(truncated)
-        );
+        byte[] encoded = new ProduceBatchPayload("orders", 0, List.of(bytes("order-101")))
+                .encode();
+        byte[] truncated = java.util.Arrays.copyOf(encoded, encoded.length - 1);
+        assertThrows(IllegalArgumentException.class, () -> ProduceBatchPayload.decode(truncated));
     }
 
     @Test
     void shouldRejectTrailingBytes() {
-        byte[] encoded = new ProduceBatchPayload(
-                "orders",
-                0,
-                List.of(bytes("order-101"))
-        ).encode();
-
-        byte[] withTrailingByte =
-                java.util.Arrays.copyOf(encoded, encoded.length + 1);
-
-        assertThrows(
-                IllegalArgumentException.class,
-                () -> ProduceBatchPayload.decode(withTrailingByte)
-        );
+        byte[] encoded = new ProduceBatchPayload("orders", 0, List.of(bytes("order-101")))
+                .encode();
+        byte[] withTrailingByte = java.util.Arrays.copyOf(encoded, encoded.length + 1);
+        assertThrows(IllegalArgumentException.class, () -> ProduceBatchPayload.decode(withTrailingByte));
     }
 
     private static byte[] bytes(String value) {
