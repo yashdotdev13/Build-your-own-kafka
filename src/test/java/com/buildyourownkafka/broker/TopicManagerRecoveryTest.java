@@ -53,4 +53,27 @@ class TopicManagerRecoveryTest {
         TopicManager topicManager = new TopicManager(tempDir);
         assertNull(topicManager.getTopic("empty-topic"));
     }
+
+    @Test
+    void shouldRejectUnexpectedFileInTopicDirectory() throws Exception {
+        Path topicDirectory = tempDir.resolve("orders");
+        Files.createDirectories(topicDirectory.resolve("partition-0"));
+        Files.createFile(topicDirectory.resolve("metadata.txt"));
+        assertThrows(RuntimeException.class, () -> new TopicManager(tempDir));
+    }
+
+    @Test
+    void shouldRejectMalformedPartitionEntryEvenWithoutValidPartitions() throws Exception {
+        Path topicDirectory = tempDir.resolve("orders");
+        Files.createDirectories(topicDirectory);
+        Files.createFile(topicDirectory.resolve("partition-backup.txt"));
+        assertThrows(RuntimeException.class, () -> new TopicManager(tempDir));
+    }
+
+
+    @Test
+    void shouldRejectUnexpectedFileInDataDirectory() throws Exception {
+        Files.createFile(tempDir.resolve("unexpected.txt"));
+        assertThrows(RuntimeException.class, () -> new TopicManager(tempDir));
+    }
 }

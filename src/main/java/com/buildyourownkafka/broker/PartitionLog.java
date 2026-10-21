@@ -5,10 +5,15 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class PartitionLog {
 
     private static final long MAX_RECORDS_PER_SEGMENT = 3;
+
+    private static final Pattern SEGMENT_FILE_PATTERN =
+            Pattern.compile("segment-(0|[1-9][0-9]*)\\.log");
 
     private final Path directory;
     private final List<LogSegment> segments = new ArrayList<>();
@@ -159,41 +164,69 @@ public class PartitionLog {
         }
     }
 
+
+
     private void loadSegments() {
         try {
-            List<Path> files;
+            List<Path> entries;
 
             try (var paths = Files.list(directory)) {
-                files = paths
-                        .filter(Files::isRegularFile)
-                        .filter(path -> {
-                            String name = path.getFileName().toString();
-
-                            return name.startsWith("segment-")
-                                    && name.endsWith(".log");
-                        })
-                        .sorted(
-                                Comparator.comparingLong(
-                                        this::extractSegmentId
-                                )
-                        )
-                        .toList();
+                entries = paths.toList();
             }
 
-            if (files.isEmpty()) {
+            List<Path> validSegmentFiles = new ArrayList<>();
+
+            for (Path entry : entries) {
+                String fileName = entry.getFileName().toString();
+
+                // The legacy file should already have been migrated.
+                if (fileName.equals("partition.log")) {
+                    throw new IllegalStateException(
+                            "Legacy log was not migrated: " + entry
+                    );
+                }
+
+                Matcher matcher = SEGMENT_FILE_PATTERN.matcher(fileName);
+
+                if (!matcher.matches()) {
+                    throw new IllegalStateException(
+                            "Unexpected entry in partition directory: " + entry
+                    );
+                }
+
+                if (!Files.isRegularFile(entry)) {
+                    throw new IllegalStateException(
+                            "Log segment must be a regular file: " + entry
+                    );
+                }
+
+                try {
+                    Long.parseLong(matcher.group(1));
+                } catch (NumberFormatException e) {
+                    throw new IllegalStateException(
+                            "Log segment ID is outside the supported range: "
+                                    + entry,
+                            e
+                    );
+                }
+
+                validSegmentFiles.add(entry);
+            }
+
+            validSegmentFiles.sort(
+                    Comparator.comparingLong(this::extractSegmentId)
+            );
+
+            if (validSegmentFiles.isEmpty()) {
                 createNewSegment(0);
                 return;
             }
 
             long expectedOffset = 0;
 
-            for (Path file : files) {
+            for (Path file : validSegmentFiles) {
                 LogSegment segment = new LogSegment(file);
-
-                expectedOffset = segment.validateOffsets(
-                        expectedOffset
-                );
-
+                expectedOffset = segment.validateOffsets(expectedOffset);
                 segments.add(segment);
             }
 
@@ -201,10 +234,13 @@ public class PartitionLog {
 
         } catch (Exception e) {
             throw new RuntimeException(
-                    "Failed to load log segments", e
+                    "Failed to load log segments from directory: " + directory,
+                    e
             );
         }
     }
+
+
 
     private void createNewSegment(long baseOffset) {
         Path segmentFile = directory.resolve(

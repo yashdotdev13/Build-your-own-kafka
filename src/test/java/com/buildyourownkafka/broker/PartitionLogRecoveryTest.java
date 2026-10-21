@@ -133,6 +133,42 @@ class PartitionLogRecoveryTest {
         assertThrows(RuntimeException.class, () -> new PartitionLog(tempDir));
     }
 
+
+    @Test
+    void shouldRejectMalformedSegmentFileName() throws Exception {
+        Files.createFile(tempDir.resolve("segment-invalid.log"));
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> new PartitionLog(tempDir)
+        );
+        assertTrue(exception.getMessage().contains(tempDir.toString())
+                || exception.getMessage().contains("segment"),
+                "Error should identify the invalid storage path");
+    }
+    @Test
+    void shouldRejectSegmentFileNameWithLeadingZero() throws Exception {
+        Files.createFile(tempDir.resolve("segment-01.log"));
+        assertThrows(RuntimeException.class, () -> new PartitionLog(tempDir));
+    }
+    @Test
+    void shouldRejectSegmentPathThatIsADirectory() throws Exception {
+        Files.createDirectories(tempDir.resolve("segment-0.log"));
+        assertThrows(RuntimeException.class, () -> new PartitionLog(tempDir));
+    }
+
+    @Test
+    void shouldRejectUnexpectedFileInPartitionDirectory() throws Exception {
+        Files.createFile(tempDir.resolve("notes.txt"));
+        assertThrows(RuntimeException.class, () -> new PartitionLog(tempDir));
+    }
+
+    @Test
+    void shouldRejectUnexpectedDirectoryInPartitionDirectory() throws Exception {
+        Files.createDirectories(tempDir.resolve("backup"));
+        assertThrows(RuntimeException.class, () -> new PartitionLog(tempDir));
+    }
+
     private static Record record(long offset, String value) {
         return new Record(
                 offset,

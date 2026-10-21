@@ -47,42 +47,106 @@ public class TopicManager {
         return topics.values();
     }
 
+
     private void recoverTopics() {
         if (!Files.exists(dataDirectory)) {
             return;
         }
-        try (var topicDirectories = Files.list(dataDirectory)) {
-            topicDirectories.filter(Files::isDirectory).forEach(this::recoverTopic);
+
+        if (!Files.isDirectory(dataDirectory)) {
+            throw new IllegalStateException(
+                    "Broker data path is not a directory: " + dataDirectory
+            );
+        }
+
+        try (var entries = Files.list(dataDirectory)) {
+            for (Path entry : entries.toList()) {
+                if (!Files.isDirectory(entry)) {
+                    throw new IllegalStateException(
+                            "Unexpected entry in broker data directory: " + entry
+                    );
+                }
+
+                recoverTopic(entry);
+            }
         } catch (IOException e) {
-            throw new RuntimeException("Failed to recover topics from disk", e);
+            throw new RuntimeException(
+                    "Failed to recover topics from disk: " + dataDirectory,
+                    e
+            );
         }
     }
+
+
 
     private void recoverTopic(Path topicDirectory) {
         String topicName = topicDirectory.getFileName().toString();
 
         try {
-            List<Path> directories;
+            List<Path> entries;
+
             try (var paths = Files.list(topicDirectory)) {
-                directories = paths.filter(Files::isDirectory).filter(path -> path.getFileName()
-                        .toString().startsWith("partition-")).toList();
+                entries = paths.toList();
             }
-            if (directories.isEmpty()) {
+
+            List<Integer> partitionIds = new java.util.ArrayList<>();
+
+            for (Path entry : entries) {
+                String entryName = entry.getFileName().toString();
+
+                Matcher matcher =
+                        PARTITION_DIRECTORY_PATTERN.matcher(entryName);
+
+                if (!matcher.matches()) {
+                    throw new IllegalStateException(
+                            "Unexpected entry in topic directory: " + entry
+                    );
+                }
+
+                if (!Files.isDirectory(entry)) {
+                    throw new IllegalStateException(
+                            "Partition entry must be a directory: " + entry
+                    );
+                }
+
+                try {
+                    partitionIds.add(Integer.parseInt(matcher.group(1)));
+                } catch (NumberFormatException e) {
+                    throw new IllegalStateException(
+                            "Partition ID is outside the supported integer range: "
+                                    + entry,
+                            e
+                    );
+                }
+            }
+
+            if (partitionIds.isEmpty()) {
                 return;
             }
-            List<Integer> partitionIds = directories.stream().map(this::extractPartitionId)
-                    .sorted(Comparator.naturalOrder()).toList();
+
+            partitionIds.sort(Comparator.naturalOrder());
+
             Topic topic = new Topic(topicName, partitionIds, dataDirectory);
 
             Topic existing = topics.putIfAbsent(topicName, topic);
             if (existing != null) {
-                throw new IllegalStateException("Duplicate recovered topic: " + topicName);
+                throw new IllegalStateException(
+                        "Duplicate recovered topic: " + topicName
+                );
             }
-            System.out.println("Recovered topic: " + topicName + " with " + partitionIds.size() + " partition(s)");
+
+            System.out.println(
+                    "Recovered topic: " + topicName
+                            + " with " + partitionIds.size() + " partition(s)"
+            );
+
         } catch (IOException e) {
-            throw new RuntimeException("Failed to recover topic: " + topicName, e);
+            throw new RuntimeException(
+                    "Failed to recover topic: " + topicName, e
+            );
         }
     }
+
 
     private int extractPartitionId(Path partitionDirectory) {
         String directoryName = partitionDirectory.getFileName().toString();
