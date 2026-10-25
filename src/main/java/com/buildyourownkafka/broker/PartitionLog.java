@@ -5,6 +5,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -17,15 +19,32 @@ public class PartitionLog {
 
     private final Path directory;
     private final List<LogSegment> segments = new ArrayList<>();
+    private final Function<Path, LogSegment> segmentFactory;
 
     private LogSegment activeSegment;
 
     public PartitionLog(Path directory) {
+        this(directory, LogSegment::new);
+    }
+
+    /*
+     * Package-private constructor for deterministic failure testing.
+     * Production callers continue to use the public constructor.
+     */
+    PartitionLog(
+            Path directory,
+            Function<Path, LogSegment> segmentFactory
+    ) {
         if (directory == null) {
             throw new IllegalArgumentException(
                     "Log directory cannot be null"
             );
         }
+
+        this.segmentFactory = Objects.requireNonNull(
+                segmentFactory,
+                "Segment factory cannot be null"
+        );
 
         this.directory = directory;
 
@@ -164,8 +183,6 @@ public class PartitionLog {
         }
     }
 
-
-
     private void loadSegments() {
         try {
             List<Path> entries;
@@ -225,7 +242,9 @@ public class PartitionLog {
             long expectedOffset = 0;
 
             for (Path file : validSegmentFiles) {
-                LogSegment segment = new LogSegment(file);
+                LogSegment segment = segmentFactory.apply(file);
+
+                // Validate before publishing the segment to the in-memory log.
                 expectedOffset = segment.validateOffsets(expectedOffset);
                 segments.add(segment);
             }
@@ -240,15 +259,18 @@ public class PartitionLog {
         }
     }
 
-
-
     private void createNewSegment(long baseOffset) {
         Path segmentFile = directory.resolve(
                 "segment-" + baseOffset + ".log"
         );
 
-        LogSegment segment = new LogSegment(segmentFile);
+        /*
+         * Initialize the segment first. If initialization fails,
+         * the active segment and segment list remain unchanged.
+         */
+        LogSegment segment = segmentFactory.apply(segmentFile);
 
+        // Publish only after successful initialization.
         segments.add(segment);
         activeSegment = segment;
 
