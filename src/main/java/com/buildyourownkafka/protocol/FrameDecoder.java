@@ -13,22 +13,48 @@ public class FrameDecoder {
     }
 
 
-    public Frame decode() throws IOException {
 
-        int length;
-        try {
-            length = input.readInt();
-        } catch (EOFException e) {
+    public Frame decode() throws IOException {
+        // EOF is clean only if no byte of a new frame was received.
+        int firstByte = input.read();
+
+        if (firstByte == -1) {
             return null;
         }
+
+        // The first byte was received, so the other three bytes
+        // of the length prefix are mandatory.
+        int length;
+
+        try {
+            length = (firstByte << 24)
+                    | (input.readUnsignedByte() << 16)
+                    | (input.readUnsignedByte() << 8)
+                    | input.readUnsignedByte();
+        } catch (EOFException e) {
+            throw new EOFException("Truncated frame length prefix");
+        }
+
         if (length < 0) {
             throw new IOException("Invalid frame length: " + length);
         }
+
         if (length > MAX_FRAME_SIZE) {
             throw new IOException("Frame too large: " + length);
         }
+
         byte[] payload = new byte[length];
-        input.readFully(payload);
+
+        try {
+            input.readFully(payload);
+        } catch (EOFException e) {
+            throw new EOFException(
+                    "Truncated frame payload: expected "
+                            + length + " bytes"
+            );
+        }
+
         return new Frame(payload);
     }
+
 }
