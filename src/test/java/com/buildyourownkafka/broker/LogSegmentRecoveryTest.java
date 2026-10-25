@@ -45,4 +45,73 @@ class LogSegmentRecoveryTest {
         Files.write(segmentFile, incompleteRecord);
         assertThrows(RuntimeException.class, () -> new LogSegment(segmentFile));
     }
+
+
+    @Test
+    void shouldRejectNegativeRecordLengthDuringRecovery() throws IOException {
+        Path segmentFile = tempDir.resolve("segment-0.log");
+
+        byte[] invalidRecord = {
+                0, 0, 0, 0, 0, 0, 0, 0, // offset = 0
+                -1, -1, -1, -1            // length = -1
+        };
+
+        Files.write(segmentFile, invalidRecord);
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> new LogSegment(segmentFile)
+        );
+
+        assertTrue(exception.getMessage().contains(segmentFile.toString())
+                || exception.getCause().getMessage().contains(segmentFile.toString()));
+    }
+
+
+    @Test
+    void shouldRejectUnreasonablyLargeRecordLengthDuringRecovery()
+            throws IOException {
+        Path segmentFile = tempDir.resolve("segment-0.log");
+
+        byte[] invalidRecord = {
+                0, 0, 0, 0, 0, 0, 0, 0, // offset = 0
+                127, -1, -1, -1          // length = Integer.MAX_VALUE
+        };
+
+        Files.write(segmentFile, invalidRecord);
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> new LogSegment(segmentFile)
+        );
+
+        assertTrue(
+                exception.getCause().getMessage().contains("record value length"),
+                "Expected record length validation to reject the oversized length"
+        );
+    }
+
+
+    @Test
+    void shouldIncludeSegmentPathWhenRecordPayloadIsTruncated()
+            throws IOException {
+        Path segmentFile = tempDir.resolve("segment-0.log");
+
+        byte[] incompleteRecord = {
+                0, 0, 0, 0, 0, 0, 0, 0, // offset = 0
+                0, 0, 0, 5,               // length = 5
+                'o', 'k'                   // only 2 payload bytes
+        };
+
+        Files.write(segmentFile, incompleteRecord);
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> new LogSegment(segmentFile)
+        );
+
+        assertTrue(exception.getMessage().contains(segmentFile.toString())
+                || exception.getCause().getMessage().contains(segmentFile.toString()));
+    }
+
 }
