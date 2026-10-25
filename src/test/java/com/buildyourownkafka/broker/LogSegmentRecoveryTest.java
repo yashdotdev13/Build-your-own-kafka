@@ -114,4 +114,36 @@ class LogSegmentRecoveryTest {
                 || exception.getCause().getMessage().contains(segmentFile.toString()));
     }
 
+
+
+    @Test
+    void shouldRejectCorruptionAfterAValidRecordDuringRecovery()
+            throws IOException {
+        Path segmentFile = tempDir.resolve("segment-0.log");
+
+        LogSegment segment = new LogSegment(segmentFile);
+        segment.append(new Record(0, "valid".getBytes()));
+
+        // Append a second record header with an invalid negative length.
+        Files.write(
+                segmentFile,
+                new byte[] {
+                        0, 0, 0, 0, 0, 0, 0, 1, // offset = 1
+                        -1, -1, -1, -1           // length = -1
+                },
+                java.nio.file.StandardOpenOption.APPEND
+        );
+
+        RuntimeException exception = assertThrows(
+                RuntimeException.class,
+                () -> new LogSegment(segmentFile)
+        );
+
+        assertTrue(
+                exception.getCause().getMessage().contains(segmentFile.toString()),
+                "Corruption error should identify the affected segment"
+        );
+    }
+
+
 }

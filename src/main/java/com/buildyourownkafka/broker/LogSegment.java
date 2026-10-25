@@ -13,6 +13,8 @@ public class LogSegment {
     private static final int RECORD_HEADER_SIZE =
             Long.BYTES + Integer.BYTES;
 
+    private static final int MAX_RECORD_VALUE_SIZE = 1024 * 1024;
+
     private final Path file;
     private long recordCount;
 
@@ -241,12 +243,17 @@ public class LogSegment {
         }
     }
 
+
     private void validateRecordLength(int valueLength)
             throws IOException {
-        if (valueLength < 0) {
+        if (valueLength < 0 || valueLength > MAX_RECORD_VALUE_SIZE) {
             throw new IOException(
-                    "Invalid record value length: " + valueLength
+                    "Invalid record value length in segment " + file
+                            + ": " + valueLength
+                            + " (allowed range: 0 to "
+                            + MAX_RECORD_VALUE_SIZE + ")"
             );
         }
     }
+
 }
