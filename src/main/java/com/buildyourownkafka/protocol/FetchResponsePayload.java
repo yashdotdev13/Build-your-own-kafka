@@ -58,6 +58,14 @@ public record FetchResponsePayload(List<Record> records) {
                 throw new IllegalArgumentException("Record count cannot be negative");
             }
 
+            // Each record requires at least 12 bytes:
+            // 8 bytes for offset + 4 bytes for value length.
+            if (recordCount > data.available() / 12) {
+                throw new IllegalArgumentException(
+                        "Record count exceeds the remaining payload"
+                );
+            }
+
             List<Record> records = new ArrayList<>(recordCount);
             for (int i = 0; i < recordCount; i++) {
                 long offset = data.readLong();
@@ -68,6 +76,12 @@ public record FetchResponsePayload(List<Record> records) {
                 int valueLength = data.readInt();
                 if (valueLength < 0) {
                     throw new IllegalArgumentException("Record value length cannot be negative");
+                }
+
+                if (valueLength > data.available()) {
+                    throw new IllegalArgumentException(
+                            "Record value length exceeds remaining payload bytes"
+                    );
                 }
 
                 byte[] value = new byte[valueLength];

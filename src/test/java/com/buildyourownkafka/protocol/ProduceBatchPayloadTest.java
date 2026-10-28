@@ -5,6 +5,10 @@ import org.junit.jupiter.api.Test;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class ProduceBatchPayloadTest {
@@ -75,6 +79,47 @@ class ProduceBatchPayloadTest {
         byte[] withTrailingByte = java.util.Arrays.copyOf(encoded, encoded.length + 1);
         assertThrows(IllegalArgumentException.class, () -> ProduceBatchPayload.decode(withTrailingByte));
     }
+
+
+    @Test
+    void shouldRejectExcessiveDeclaredRecordCount() throws IOException {
+        byte[] topic = bytes("orders");
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+
+        try (DataOutputStream output = new DataOutputStream(bytes)) {
+            output.writeInt(topic.length);
+            output.write(topic);
+            output.writeInt(0); // Partition
+            output.writeInt(Integer.MAX_VALUE); // Record count
+        }
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> ProduceBatchPayload.decode(bytes.toByteArray())
+        );
+    }
+
+    @Test
+    void shouldRejectRecordLengthExceedingRemainingPayload()
+            throws IOException {
+        byte[] topic = bytes("orders");
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+
+        try (DataOutputStream output = new DataOutputStream(bytes)) {
+            output.writeInt(topic.length);
+            output.write(topic);
+            output.writeInt(0); // Partition
+            output.writeInt(1); // One record
+            output.writeInt(Integer.MAX_VALUE); // Record length
+            output.write(new byte[]{1, 2, 3}); // Only 3 bytes provided
+        }
+
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> ProduceBatchPayload.decode(bytes.toByteArray())
+        );
+    }
+
 
     private static byte[] bytes(String value) {
         return value.getBytes(StandardCharsets.UTF_8);
