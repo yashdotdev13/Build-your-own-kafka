@@ -20,6 +20,32 @@ messages over a persistent TCP connection. This allows multiple requests
 and responses to travel over the same connection without treating each
 socket read as a complete message.
 
+## Frame Length Validation
+
+Each framed message begins with a four-byte, big-endian signed integer representing the payload length. The length prefix itself is not included in the payload length.
+
+The decoder enforces a maximum payload size of 1 MiB (1,048,576 bytes).
+
+The following rules apply:
+
+- **Negative lengths:** Rejected as invalid frame lengths.
+- **Zero-length payloads:** Accepted as valid empty frames.
+- **Payloads up to 1 MiB:** Accepted when the complete payload is available.
+- **Payloads larger than 1 MiB:** Rejected before allocating the payload buffer.
+- **Incomplete length prefixes:** Rejected when the connection ends after only part of the four-byte prefix has been received.
+- **Incomplete payloads:** Rejected when fewer bytes are available than the declared payload length.
+
+The maximum applies to the payload only; the four-byte length prefix is additional.
+
+These rules protect the decoder from invalid length values and unnecessarily large payload allocations while preserving the existing framing format for valid messages.
+
+### Error Handling
+
+Invalid or oversized frame lengths produce an `IOException`. Truncated length prefixes and payloads produce an `EOFException`, which is a subclass of `IOException`.
+
+The decoder does not silently treat an incomplete frame as a valid message.
+
+
 ## Request Structure
 
 A request contains the information needed by the broker to identify and

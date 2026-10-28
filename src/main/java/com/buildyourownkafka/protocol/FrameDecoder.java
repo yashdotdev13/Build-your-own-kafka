@@ -6,7 +6,12 @@ import java.io.IOException;
 
 public class FrameDecoder {
 
-    private static final int MAX_FRAME_SIZE = 1024 * 1024;
+    /**
+     * Maximum accepted frame payload size: 1 MiB.
+     *
+     * The four-byte frame length prefix is not included in this limit.
+     */
+    public static final int MAX_FRAME_SIZE = 1024 * 1024;
     private final DataInputStream input;
     public FrameDecoder(DataInputStream input) {
         this.input = input;

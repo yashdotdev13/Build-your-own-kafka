@@ -15,57 +15,72 @@ class FrameDecoderTest {
     @Test
     void shouldReturnNullWhenEofOccursBeforeNewFrame() throws IOException {
         FrameDecoder decoder = decoder(new byte[0]);
-
         assertNull(decoder.decode());
     }
 
     @Test
     void shouldRejectPartialLengthPrefix() {
         FrameDecoder decoder = decoder(new byte[]{0, 0});
-
-        assertThrows(
-                EOFException.class,
-                decoder::decode
-        );
+        assertThrows(EOFException.class, decoder::decode);
     }
 
     @Test
     void shouldRejectPayloadShorterThanDeclaredLength() {
-        byte[] bytes = ByteBuffer.allocate(6)
-                .putInt(5)
-                .put((byte) 10)
-                .put((byte) 20)
-                .array();
-
+        byte[] bytes = ByteBuffer.allocate(6).putInt(5).put((byte) 10).put((byte) 20).array();
         FrameDecoder decoder = decoder(bytes);
-
-        assertThrows(
-                EOFException.class,
-                decoder::decode
-        );
+        assertThrows(EOFException.class, decoder::decode);
     }
 
     @Test
     void shouldDecodeMultipleConsecutiveFrames() throws IOException {
-        byte[] bytes = ByteBuffer.allocate(11)
-                .putInt(3)
-                .put(new byte[]{1, 2, 3})
-                .putInt(0)
-                .array();
-
+        byte[] bytes = ByteBuffer.allocate(11).putInt(3)
+                .put(new byte[]{1, 2, 3}).putInt(0).array();
         FrameDecoder decoder = decoder(bytes);
-
         Frame first = decoder.decode();
         Frame second = decoder.decode();
-
         assertNotNull(first);
         assertNotNull(second);
         assertNull(decoder.decode());
     }
 
+    @Test
+    void shouldDecodeZeroLengthFrame() throws IOException {
+        FrameDecoder decoder = decoder(ByteBuffer.allocate(Integer.BYTES).putInt(0).array());
+        Frame frame = decoder.decode();
+        assertNotNull(frame);
+        assertEquals(0, frame.payload().length);
+        assertNull(decoder.decode());
+    }
+
+    @Test
+    void shouldRejectNegativeFrameLength() {
+        FrameDecoder decoder = decoder(ByteBuffer.allocate(Integer.BYTES).putInt(-1).array());
+        IOException exception = assertThrows(IOException.class, decoder::decode);
+        assertTrue(exception.getMessage().contains("Invalid frame length"));
+    }
+
+    @Test
+    void shouldRejectFrameLengthAboveMaximum() {
+        int maxFrameSize = 1024 * 1024;
+        FrameDecoder decoder = decoder(ByteBuffer.allocate(Integer.BYTES).putInt(maxFrameSize + 1).array());
+        IOException exception = assertThrows(IOException.class, decoder::decode);
+        assertTrue(exception.getMessage().contains("Frame too large"));
+    }
+
+    @Test
+    void shouldDecodeFrameAtMaximumAllowedSize() throws IOException {
+        int maxFrameSize = 1024 * 1024;
+        byte[] bytes = ByteBuffer.allocate(Integer.BYTES + maxFrameSize)
+                .putInt(maxFrameSize).put(new byte[maxFrameSize]).array();
+        FrameDecoder decoder = decoder(bytes);
+        Frame frame = decoder.decode();
+
+        assertNotNull(frame);
+        assertEquals(maxFrameSize, frame.payload().length);
+        assertNull(decoder.decode());
+    }
+
     private FrameDecoder decoder(byte[] bytes) {
-        return new FrameDecoder(
-                new DataInputStream(new ByteArrayInputStream(bytes))
-        );
+        return new FrameDecoder(new DataInputStream(new ByteArrayInputStream(bytes)));
     }
 }
