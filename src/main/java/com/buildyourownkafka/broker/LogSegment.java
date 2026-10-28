@@ -1,13 +1,13 @@
 package com.buildyourownkafka.broker;
 
 import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.EOFException;
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-
 public class LogSegment {
 
     private static final int RECORD_HEADER_SIZE =
@@ -47,24 +47,52 @@ public class LogSegment {
         }
     }
 
+    /**
+     * Appends a record and forces the file contents to storage before returning.
+     *
+     * A successful return means the record was written and the force operation
+     * completed successfully. Actual persistence guarantees depend on the
+     * filesystem and storage device.
+     *
+     * Forcing each append improves durability but increases write latency.
+     *
+     * @param record record to append
+     * @throws IllegalArgumentException if the record is null
+     * @throws RuntimeException if writing or forcing the record fails
+     */
     public synchronized void append(Record record) {
         if (record == null) {
+            throw new IllegalArgumentException("Record cannot be null");
+        }
+
+        byte[] value = record.value();
+
+        if (value.length > MAX_RECORD_VALUE_SIZE) {
             throw new IllegalArgumentException(
-                    "Record cannot be null"
+                    "Record value exceeds maximum size of "
+                            + MAX_RECORD_VALUE_SIZE + " bytes"
             );
         }
 
-        try (DataOutputStream output = new DataOutputStream(
-                Files.newOutputStream(
-                        file,
-                        StandardOpenOption.APPEND
-                ))) {
+        ByteBuffer buffer = ByteBuffer.allocate(
+                RECORD_HEADER_SIZE + value.length
+        );
 
-            output.writeLong(record.offset());
-            output.writeInt(record.value().length);
-            output.write(record.value());
-            output.flush();
+        buffer.putLong(record.offset());
+        buffer.putInt(value.length);
+        buffer.put(value);
+        buffer.flip();
 
+        try (FileChannel channel = FileChannel.open(
+                file,
+                StandardOpenOption.WRITE,
+                StandardOpenOption.APPEND
+        )) {
+            while (buffer.hasRemaining()) {
+                channel.write(buffer);
+            }
+
+            channel.force(true);
             recordCount++;
 
         } catch (IOException e) {
