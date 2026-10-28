@@ -89,4 +89,75 @@ class CommitOffsetPayloadTest {
         return outputBytes.toByteArray();
     }
 
+
+    @Test
+    void shouldRejectNegativeGroupIdLength() throws IOException {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+
+        try (DataOutputStream output = new DataOutputStream(bytes)) {
+            output.writeInt(-1);
+        }
+
+        assertThrows(
+                RuntimeException.class,
+                () -> CommitOffsetPayload.decode(bytes.toByteArray())
+        );
+    }
+
+    @Test
+    void shouldRejectNegativeTopicLength() throws IOException {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+
+        try (DataOutputStream output = new DataOutputStream(bytes)) {
+            byte[] groupId = "group-1".getBytes(
+                    java.nio.charset.StandardCharsets.UTF_8
+            );
+
+            output.writeInt(groupId.length);
+            output.write(groupId);
+            output.writeInt(-1);
+        }
+
+        assertThrows(
+                RuntimeException.class,
+                () -> CommitOffsetPayload.decode(bytes.toByteArray())
+        );
+    }
+
+
+    @Test
+    void shouldRejectGroupIdLengthExceedingAvailableBytes() throws IOException {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+
+        try (DataOutputStream output = new DataOutputStream(bytes)) {
+            output.writeInt(100); // Claims 100 group-ID bytes
+            output.write("short".getBytes(
+                    java.nio.charset.StandardCharsets.UTF_8
+            )); // Only 5 bytes provided
+        }
+
+        assertThrows(
+                RuntimeException.class,
+                () -> CommitOffsetPayload.decode(bytes.toByteArray())
+        );
+    }
+
+
+    @Test
+    void shouldRejectGroupIdLengthLargerThanPayload() throws IOException {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+
+        try (DataOutputStream output = new DataOutputStream(bytes)) {
+            output.writeInt(Integer.MAX_VALUE);
+        }
+
+        assertThrows(
+                RuntimeException.class,
+                () -> CommitOffsetPayload.decode(bytes.toByteArray())
+        );
+    }
+
+
+
+
 }

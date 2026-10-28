@@ -56,6 +56,13 @@ public record FetchOffsetPayload(String groupId, String topic, int partition) {
             }
             String topic = new String(topicBytes, StandardCharsets.UTF_8);
             int partition = input.readInt();
+
+            if (input.available() != 0) {
+                throw new IOException(
+                        "Unexpected bytes in FETCH_OFFSET payload"
+                );
+            }
+
             return new FetchOffsetPayload(groupId, topic, partition);
         } catch (IOException e) {
             throw new RuntimeException("Failed to decode fetch offset payload", e);
