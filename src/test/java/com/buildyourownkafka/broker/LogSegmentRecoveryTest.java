@@ -145,5 +145,27 @@ class LogSegmentRecoveryTest {
         );
     }
 
+    @Test
+    void shouldRecoverAppendedRecordsAfterClosingAndReopeningSegment() {
+        Path segmentFile = tempDir.resolve("durable-segment.log");
+
+        LogSegment segment = new LogSegment(segmentFile);
+        segment.append(new Record(0, "first-message".getBytes()));
+        segment.append(new Record(1, "second-message".getBytes()));
+
+        LogSegment reopened = new LogSegment(segmentFile);
+
+        assertEquals(2, reopened.recordCount());
+        assertEquals(2L, reopened.nextOffset());
+        assertEquals(
+                "first-message",
+                new String(reopened.read(0).value())
+        );
+        assertEquals(
+                "second-message",
+                new String(reopened.read(1).value())
+        );
+    }
+
 
 }
