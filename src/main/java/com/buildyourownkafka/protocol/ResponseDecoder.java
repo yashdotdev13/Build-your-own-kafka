@@ -1,4 +1,3 @@
-
 package com.buildyourownkafka.protocol;
 
 import java.io.ByteArrayInputStream;
@@ -31,8 +30,12 @@ public class ResponseDecoder {
 
         int correlationId = data.readInt();
         int status = data.readInt();
-        int payloadLength = data.readInt();
 
+        if (status != Response.SUCCESS && status != Response.ERROR) {
+            throw new IOException("Invalid response status: " + status);
+        }
+
+        int payloadLength = data.readInt();
         int remaining = data.available();
 
         if (payloadLength < 0 || payloadLength != remaining) {

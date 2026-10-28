@@ -49,6 +49,20 @@ class ResponseDecoderTest {
         assertThrows(IOException.class, () -> decoder(frame).decode());
     }
 
+    @Test
+    void shouldRejectInvalidResponseStatus() throws IOException {
+        byte[] frame = responseFrame(
+                42,
+                99, // Invalid status: only SUCCESS (0) and ERROR (1) are defined
+                new byte[]{1, 2, 3}
+        );
+
+        assertThrows(
+                IOException.class,
+                () -> decoder(frame).decode()
+        );
+    }
+
     private static ResponseDecoder decoder(byte[] bytes) {
         return new ResponseDecoder(
                 new DataInputStream(new ByteArrayInputStream(bytes)));
