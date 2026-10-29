@@ -54,6 +54,38 @@ class RequestDispatcherTest {
         assertFalse(response.payload().length == 0);
     }
 
+    @Test
+    void shouldReturnGenericErrorWhenHandlerThrowsUnexpectedException() {
+        RequestDispatcher dispatcher = new RequestDispatcher(
+                java.util.Map.of(
+                        Request.PING,
+                        request -> {
+                            throw new IllegalStateException(
+                                    "sensitive internal detail"
+                            );
+                        }
+                )
+        );
+
+        Request request = new Request(
+                Request.PING,
+                (short) 1,
+                99,
+                new byte[0]
+        );
+
+        Response response = dispatcher.dispatch(request);
+        String message = new String(
+                response.payload(),
+                java.nio.charset.StandardCharsets.UTF_8
+        );
+
+        assertEquals(99, response.correlationId());
+        assertEquals(Response.ERROR, response.status());
+        assertEquals("Internal server error", message);
+        assertFalse(message.contains("sensitive internal detail"));
+    }
+
     private RequestDispatcher createDispatcher() {
         TopicManager topicManager = new TopicManager(tempDir);
         ConsumerOffsetStore offsetStore =
