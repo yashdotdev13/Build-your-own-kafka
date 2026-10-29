@@ -1,11 +1,11 @@
+
 package com.buildyourownkafka.broker;
 
 import com.buildyourownkafka.protocol.ProduceBatchPayload;
 import com.buildyourownkafka.protocol.ProduceBatchResponsePayload;
+import com.buildyourownkafka.protocol.ProtocolErrors;
 import com.buildyourownkafka.protocol.Request;
 import com.buildyourownkafka.protocol.Response;
-
-import java.nio.charset.StandardCharsets;
 
 public class ProduceBatchRequestHandler implements RequestHandler {
 
@@ -24,11 +24,9 @@ public class ProduceBatchRequestHandler implements RequestHandler {
             Topic topic = topicManager.getTopic(payload.topicName());
 
             if (topic == null) {
-                return new Response(
+                return ProtocolErrors.clientError(
                         request.correlationId(),
-                        Response.ERROR,
-                        ("Topic does not exist: " + payload.topicName())
-                                .getBytes(StandardCharsets.UTF_8)
+                        "Topic does not exist: " + payload.topicName()
                 );
             }
 
@@ -59,10 +57,9 @@ public class ProduceBatchRequestHandler implements RequestHandler {
             );
 
         } catch (IllegalArgumentException e) {
-            return new Response(
+            return ProtocolErrors.clientError(
                     request.correlationId(),
-                    Response.ERROR,
-                    e.getMessage().getBytes(StandardCharsets.UTF_8)
+                    e.getMessage()
             );
         }
     }
