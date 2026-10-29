@@ -64,8 +64,17 @@ public record ProducePayload(String topicName, int partitionId, byte[] value) {
             }
 
             int valueLength = data.readInt();
+
             if (valueLength < 0) {
-                throw new IllegalArgumentException("Record value length cannot be negative");
+                throw new IllegalArgumentException(
+                        "Record value length cannot be negative"
+                );
+            }
+
+            if (valueLength > data.available()) {
+                throw new IllegalArgumentException(
+                        "Record value length exceeds remaining payload bytes"
+                );
             }
 
             byte[] value = new byte[valueLength];

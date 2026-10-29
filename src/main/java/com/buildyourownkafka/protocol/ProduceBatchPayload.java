@@ -123,6 +123,12 @@ public record ProduceBatchPayload(
                 );
             }
 
+            // Every record needs at least a 4-byte length field.
+            if (recordCount > data.available() / Integer.BYTES) {
+                throw new IllegalArgumentException(
+                        "Record count exceeds the remaining payload"
+                );
+            }
             List<byte[]> records =
                     new ArrayList<>(recordCount);
 
@@ -132,6 +138,12 @@ public record ProduceBatchPayload(
                 if (recordLength < 0) {
                     throw new IllegalArgumentException(
                             "Record value length cannot be negative"
+                    );
+                }
+
+                if (recordLength > data.available()) {
+                    throw new IllegalArgumentException(
+                            "Record length exceeds remaining payload bytes"
                     );
                 }
 

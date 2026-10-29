@@ -61,6 +61,13 @@ public record CommitOffsetPayload(String groupId, String topic, int partition, l
             String topic = new String(topicBytes, StandardCharsets.UTF_8);
             int partition = input.readInt();
             long offset = input.readLong();
+
+            if (input.available() != 0) {
+                throw new IOException(
+                        "Unexpected bytes in COMMIT_OFFSET payload"
+                );
+            }
+
             return new CommitOffsetPayload(groupId, topic, partition, offset);
         } catch (IOException e) {
             throw new RuntimeException("Failed to decode commit offset payload", e);

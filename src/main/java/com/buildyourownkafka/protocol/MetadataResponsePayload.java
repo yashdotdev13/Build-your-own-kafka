@@ -67,9 +67,20 @@ public record MetadataResponsePayload(String topicName, List<Integer> partitionI
             String topicName = new String(topicBytes, StandardCharsets.UTF_8);
             int partitionCount = data.readInt();
             if (partitionCount <= 0) {
-                throw new IllegalArgumentException("Partition count must be greater than zero");
+                throw new IllegalArgumentException(
+                        "Partition count must be greater than zero"
+                );
             }
-            List<Integer> partitionIds = new java.util.ArrayList<>();
+
+          // Every partition requires exactly 4 bytes.
+            if (partitionCount > data.available() / Integer.BYTES) {
+                throw new IllegalArgumentException(
+                        "Partition count exceeds the remaining payload"
+                );
+            }
+
+            List<Integer> partitionIds =
+                    new java.util.ArrayList<>(partitionCount);
             for (int i = 0; i < partitionCount; i++) {
                 int partitionId = data.readInt();
 
