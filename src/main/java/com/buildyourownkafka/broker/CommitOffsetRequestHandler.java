@@ -1,10 +1,12 @@
 package com.buildyourownkafka.broker;
 
 import com.buildyourownkafka.protocol.CommitOffsetPayload;
+import com.buildyourownkafka.protocol.ProtocolErrors;
 import com.buildyourownkafka.protocol.Request;
 import com.buildyourownkafka.protocol.Response;
 
 public class CommitOffsetRequestHandler implements RequestHandler {
+
     private final ConsumerOffsetStore consumerOffsetStore;
     public CommitOffsetRequestHandler(ConsumerOffsetStore consumerOffsetStore) {
         if (consumerOffsetStore == null) {
@@ -12,15 +14,20 @@ public class CommitOffsetRequestHandler implements RequestHandler {
         }
         this.consumerOffsetStore = consumerOffsetStore;
     }
+
     @Override
     public Response handle(Request request) {
-
         try {
             CommitOffsetPayload payload = CommitOffsetPayload.decode(request.payload());
             consumerOffsetStore.commit(payload.groupId(), payload.topic(), payload.partition(), payload.offset());
             return new Response(request.correlationId(), Response.SUCCESS, new byte[0]);
-        } catch (Exception e) {
-            return new Response(request.correlationId(), Response.ERROR, ("Failed to commit offset: " + e.getMessage()).getBytes());
+
+        } catch (IllegalArgumentException e) {
+            return ProtocolErrors.clientError(request.correlationId(), e.getMessage());
+        } catch (RuntimeException e) {
+            System.err.println("Unexpected COMMIT_OFFSET failure: correlationId=" + request.correlationId() + ", exception=" +
+                    e.getClass().getName() + ", message=" + e.getMessage());
+            return ProtocolErrors.internalError(request.correlationId());
         }
     }
 }
