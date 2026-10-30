@@ -2,10 +2,10 @@ package com.buildyourownkafka.broker;
 
 import com.buildyourownkafka.protocol.FetchPayload;
 import com.buildyourownkafka.protocol.FetchResponsePayload;
+import com.buildyourownkafka.protocol.ProtocolErrors;
 import com.buildyourownkafka.protocol.Request;
 import com.buildyourownkafka.protocol.Response;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public class FetchRequestHandler implements RequestHandler {
@@ -18,59 +18,19 @@ public class FetchRequestHandler implements RequestHandler {
 
     @Override
     public Response handle(Request request) {
-
         try {
-
-            // 1. Decode FETCH payload
-            FetchPayload payload =
-                    FetchPayload.decode(request.payload());
-
-            // 2. Find topic
-            Topic topic =
-                    topicManager.getTopic(payload.topicName());
-
+            FetchPayload payload = FetchPayload.decode(request.payload());
+            Topic topic = topicManager.getTopic(payload.topicName());
             if (topic == null) {
-
-                return new Response(
-                        request.correlationId(),
-                        Response.ERROR,
-                        (
-                                "Topic does not exist: "
-                                        + payload.topicName()
-                        ).getBytes(StandardCharsets.UTF_8)
-                );
+                return ProtocolErrors.clientError(request.correlationId(),
+                        "Topic does not exist: " + payload.topicName());
             }
-
-            // 3. Find partition
-            Partition partition =
-                    topic.getPartition(payload.partitionId());
-
-            // 4. Read records from requested offset
-            //    with the requested batch limit
-            List<Record> records =
-                    partition.readFrom(
-                            payload.offset(),
-                            payload.maxRecords()
-                    );
-
-            // 5. Create response payload
-            FetchResponsePayload responsePayload =
-                    new FetchResponsePayload(records);
-
-            // 6. Return response
-            return new Response(
-                    request.correlationId(),
-                    Response.SUCCESS,
-                    responsePayload.encode()
-            );
-
+            Partition partition = topic.getPartition(payload.partitionId());
+            List<Record> records = partition.readFrom(payload.offset(), payload.maxRecords());
+            FetchResponsePayload responsePayload = new FetchResponsePayload(records);
+            return new Response(request.correlationId(), Response.SUCCESS, responsePayload.encode());
         } catch (IllegalArgumentException e) {
-
-            return new Response(
-                    request.correlationId(),
-                    Response.ERROR,
-                    e.getMessage().getBytes(StandardCharsets.UTF_8)
-            );
+            return ProtocolErrors.clientError(request.correlationId(), e.getMessage());
         }
     }
 }

@@ -1,7 +1,10 @@
 package com.buildyourownkafka.broker;
 
+import com.buildyourownkafka.protocol.ProtocolErrors;
 import com.buildyourownkafka.protocol.Request;
 import com.buildyourownkafka.protocol.Response;
+
+import java.io.IOException;
 
 public class JoinGroupRequestHandler implements RequestHandler {
 
@@ -16,21 +19,27 @@ public class JoinGroupRequestHandler implements RequestHandler {
 
     @Override
     public Response handle(Request request) {
-
         try {
             JoinGroupRequestPayload payload = JoinGroupRequestPayload.decode(request.payload());
-            System.out.println("Decoded JOIN_GROUP: group=" + payload.groupId() + ", member=" + payload.memberId() + ", partitions=" + payload.partitionCount());
-            JoinGroupResult result = coordinator.joinGroup(payload.groupId(), payload.memberId(), payload.partitionCount());
+            JoinGroupResult result = coordinator.joinGroup(payload.groupId(), payload.memberId(),
+                    payload.partitionCount());
             JoinGroupResponsePayload responsePayload = new JoinGroupResponsePayload(result.memberId(),
                     result.generation(), result.partitions());
-            byte[] encodedResponse = responsePayload.encode();
-            return new Response(request.correlationId(), Response.SUCCESS, encodedResponse);
+            return new Response(request.correlationId(), Response.SUCCESS, responsePayload.encode());
         } catch (IllegalArgumentException e) {
-            System.err.println("Failed to process JOIN_GROUP: " + e.getMessage());
-            return new Response(request.correlationId(), Response.ERROR, e.getMessage().getBytes());
-        } catch (Exception e) {
-            System.err.println("Unexpected JOIN_GROUP error: " + e.getMessage());
-            return new Response(request.correlationId(), Response.ERROR, "Internal JOIN_GROUP error".getBytes());
+            System.err.println("Invalid JOIN_GROUP request: correlationId=" + request.correlationId() +
+                    ", reason=" + e.getMessage());
+            return ProtocolErrors.clientError(request.correlationId(), e.getMessage());
+        } catch (ConsumerGroupException e) {
+            return ProtocolErrors.clientError(request.correlationId(), e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Failed to encode JOIN_GROUP response: correlationId=" +
+                    request.correlationId() + ", message=" + e.getMessage());
+            return ProtocolErrors.internalError(request.correlationId());
+        } catch (RuntimeException e) {
+            System.err.println("Unexpected JOIN_GROUP failure: correlationId=" + request.correlationId() + ", exception=" +
+                    e.getClass().getName() + ", message=" + e.getMessage());
+            return ProtocolErrors.internalError(request.correlationId());
         }
     }
 }
