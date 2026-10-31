@@ -16,6 +16,7 @@ public class ClientConnection {
 
     private final Socket socket;
     private final TopicManager topicManager;
+    private final int socketReadTimeoutMs;
     private final ConsumerOffsetStore consumerOffsetStore;
     private final ConsumerGroupCoordinator consumerGroupCoordinator;
 
@@ -25,13 +26,38 @@ public class ClientConnection {
             ConsumerOffsetStore consumerOffsetStore,
             ConsumerGroupCoordinator consumerGroupCoordinator
     ) {
+        this(
+                socket,
+                topicManager,
+                consumerOffsetStore,
+                consumerGroupCoordinator,
+                BrokerNetworkConfig.SOCKET_READ_TIMEOUT_MS
+        );
+    }
+
+    ClientConnection(
+            Socket socket,
+            TopicManager topicManager,
+            ConsumerOffsetStore consumerOffsetStore,
+            ConsumerGroupCoordinator consumerGroupCoordinator,
+            int socketReadTimeoutMs
+    ) {
+        if (socketReadTimeoutMs <= 0) {
+            throw new IllegalArgumentException(
+                    "Socket read timeout must be positive"
+            );
+        }
+
         this.socket = socket;
         this.topicManager = topicManager;
         this.consumerOffsetStore = consumerOffsetStore;
         this.consumerGroupCoordinator = consumerGroupCoordinator;
+        this.socketReadTimeoutMs = socketReadTimeoutMs;
     }
 
     public void handle() throws IOException {
+
+        socket.setSoTimeout(socketReadTimeoutMs);
 
         DataInputStream input =
                 new DataInputStream(socket.getInputStream());
@@ -72,7 +98,7 @@ public class ClientConnection {
                     "Client read timed out: "
                             + socket.getRemoteSocketAddress()
                             + ", timeoutMs="
-                            + BrokerNetworkConfig.SOCKET_READ_TIMEOUT_MS
+                            + socketReadTimeoutMs
             );
 
         } finally {
