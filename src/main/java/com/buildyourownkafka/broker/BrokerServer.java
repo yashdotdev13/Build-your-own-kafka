@@ -40,6 +40,9 @@ public class BrokerServer {
         while (running) {
             try {
                 Socket clientSocket = serverSocket.accept();
+                clientSocket.setSoTimeout(
+                        BrokerNetworkConfig.SOCKET_READ_TIMEOUT_MS
+                );
                 System.out.println("Client connected: " + clientSocket.getRemoteSocketAddress());
                 Thread.startVirtualThread(() -> handleClient(clientSocket));
             } catch (IOException e) {

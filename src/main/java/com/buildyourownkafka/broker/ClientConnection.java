@@ -1,3 +1,4 @@
+
 package com.buildyourownkafka.broker;
 
 import com.buildyourownkafka.protocol.Request;
@@ -9,6 +10,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 
 public class ClientConnection {
 
@@ -17,9 +19,12 @@ public class ClientConnection {
     private final ConsumerOffsetStore consumerOffsetStore;
     private final ConsumerGroupCoordinator consumerGroupCoordinator;
 
-    public ClientConnection(Socket socket, TopicManager topicManager, ConsumerOffsetStore consumerOffsetStore,
-                            ConsumerGroupCoordinator consumerGroupCoordinator) {
-
+    public ClientConnection(
+            Socket socket,
+            TopicManager topicManager,
+            ConsumerOffsetStore consumerOffsetStore,
+            ConsumerGroupCoordinator consumerGroupCoordinator
+    ) {
         this.socket = socket;
         this.topicManager = topicManager;
         this.consumerOffsetStore = consumerOffsetStore;
@@ -28,21 +33,53 @@ public class ClientConnection {
 
     public void handle() throws IOException {
 
-        DataInputStream input = new DataInputStream(socket.getInputStream());
-        DataOutputStream output = new DataOutputStream(socket.getOutputStream());
+        DataInputStream input =
+                new DataInputStream(socket.getInputStream());
+
+        DataOutputStream output =
+                new DataOutputStream(socket.getOutputStream());
+
         RequestDecoder requestDecoder = new RequestDecoder(input);
         ResponseEncoder responseEncoder = new ResponseEncoder(output);
-        RequestDispatcher dispatcher = new RequestDispatcher(topicManager, consumerOffsetStore, consumerGroupCoordinator);
 
-        while (true) {
-            Request request = requestDecoder.decode();
-            if (request == null) {
-                break;
+        RequestDispatcher dispatcher = new RequestDispatcher(
+                topicManager,
+                consumerOffsetStore,
+                consumerGroupCoordinator
+        );
+
+        try {
+            while (true) {
+                Request request = requestDecoder.decode();
+
+                if (request == null) {
+                    break;
+                }
+
+                System.out.println(
+                        "Received request: type="
+                                + request.type()
+                                + ", correlationId="
+                                + request.correlationId()
+                );
+
+                Response response = dispatcher.dispatch(request);
+                responseEncoder.encode(response);
             }
-            System.out.println("Received request: type=" + request.type() + ", correlationId=" + request.correlationId());
-            Response response = dispatcher.dispatch(request);
-            responseEncoder.encode(response);
+
+        } catch (SocketTimeoutException e) {
+            System.err.println(
+                    "Client read timed out: "
+                            + socket.getRemoteSocketAddress()
+                            + ", timeoutMs="
+                            + BrokerNetworkConfig.SOCKET_READ_TIMEOUT_MS
+            );
+
+        } finally {
+            System.out.println(
+                    "Client connection closed: "
+                            + socket.getRemoteSocketAddress()
+            );
         }
-        System.out.println("Client disconnected: " + socket.getRemoteSocketAddress());
     }
 }
