@@ -4,6 +4,7 @@ package com.buildyourownkafka.protocol;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
+import java.net.Socket;
 
 public class RequestDecoder {
 
@@ -18,7 +19,22 @@ public class RequestDecoder {
         this.frameDecoder = new FrameDecoder(input);
     }
 
+    public RequestDecoder(
+            DataInputStream input,
+            Socket socket,
+            int requestTimeoutMs,
+            int socketReadTimeoutMs
+    ) {
+        this.frameDecoder = new FrameDecoder(
+                input,
+                socket,
+                requestTimeoutMs,
+                socketReadTimeoutMs
+        );
+    }
+
     public Request decode() throws IOException {
+
         Frame frame = frameDecoder.decode();
 
         if (frame == null) {
@@ -30,7 +46,8 @@ public class RequestDecoder {
         }
 
         DataInputStream data = new DataInputStream(
-                new ByteArrayInputStream(frame.payload()));
+                new ByteArrayInputStream(frame.payload())
+        );
 
         int type = data.readInt();
         short version = data.readShort();
@@ -42,12 +59,21 @@ public class RequestDecoder {
         if (payloadLength < 0 || payloadLength != remaining) {
             throw new IOException(
                     "Invalid request payload length: declared "
-                            + payloadLength + ", remaining " + remaining);
+                            + payloadLength
+                            + ", remaining "
+                            + remaining
+            );
         }
 
         byte[] payload = new byte[payloadLength];
+
         data.readFully(payload);
 
-        return new Request(type, version, correlationId, payload);
+        return new Request(
+                type,
+                version,
+                correlationId,
+                payload
+        );
     }
 }
