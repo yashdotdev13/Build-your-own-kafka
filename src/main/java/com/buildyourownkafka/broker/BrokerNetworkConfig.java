@@ -7,7 +7,7 @@ package com.buildyourownkafka.broker;
 public final class BrokerNetworkConfig {
 
     /**
-     * Maximum idle time between socket reads.
+     * Maximum read interval while receiving a frame.
      */
     public static final int SOCKET_READ_TIMEOUT_MS = 30_000;
 
