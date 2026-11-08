@@ -1,16 +1,16 @@
-
 package com.buildyourownkafka.broker;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Path;
+import java.util.Objects;
 import java.util.concurrent.Semaphore;
 
 public class BrokerServer {
 
     private final int port;
-    private ServerSocket serverSocket;
+    private volatile ServerSocket serverSocket;
     private volatile boolean running;
 
     private final TopicManager topicManager;
@@ -19,7 +19,12 @@ public class BrokerServer {
     private final ConsumerGroupCoordinator consumerGroupCoordinator;
 
     /**
-     * Limits the number of concurrently active client connections.
+     * Maximum number of concurrently active client connections.
+     */
+    private final int maxConnections;
+
+    /**
+     * Controls admission of client connections.
      */
     private final Semaphore connectionPermits;
 
@@ -27,13 +32,18 @@ public class BrokerServer {
         this(port, BrokerNetworkConfig.MAX_CONNECTIONS);
     }
 
+    public BrokerServer(int port, int maxConnections) {
+        this(port, maxConnections, Path.of("data"));
+    }
+
     /**
-     * Creates a broker with a configurable maximum connection count.
+     * Creates a broker with configurable connection limits and storage.
      *
      * @param port broker listening port
      * @param maxConnections maximum concurrently active connections
+     * @param dataDirectory root directory for broker data
      */
-    public BrokerServer(int port, int maxConnections) {
+    BrokerServer(int port, int maxConnections, Path dataDirectory) {
 
         if (maxConnections <= 0) {
             throw new IllegalArgumentException(
@@ -42,12 +52,21 @@ public class BrokerServer {
         }
 
         this.port = port;
+        this.maxConnections = maxConnections;
         this.connectionPermits = new Semaphore(maxConnections);
 
-        this.topicManager = new TopicManager(Path.of("data", "topics"));
-        this.consumerOffsetStore =
-                new ConsumerOffsetStore(Path.of("data", "offsets"));
+        Path storageDirectory = Objects.requireNonNull(dataDirectory);
+
+        this.topicManager = new TopicManager(
+                storageDirectory.resolve("topics")
+        );
+
+        this.consumerOffsetStore = new ConsumerOffsetStore(
+                storageDirectory.resolve("offsets")
+        );
+
         this.consumerGroupManager = new ConsumerGroupManager();
+
         this.consumerGroupCoordinator =
                 new ConsumerGroupCoordinator(consumerGroupManager);
     }
@@ -62,9 +81,8 @@ public class BrokerServer {
         System.out.println("========================================");
         System.out.println();
         System.out.println("Broker starting...");
-        System.out.println("Port: " + port);
-        System.out.println("Maximum connections: "
-                + connectionPermits.availablePermits());
+        System.out.println("Port: " + serverSocket.getLocalPort());
+        System.out.println("Maximum connections: " + maxConnections);
         System.out.println();
         System.out.println("Broker started successfully.");
         System.out.println("Waiting for connections...");
@@ -72,8 +90,8 @@ public class BrokerServer {
         while (running) {
             try {
                 Socket clientSocket = serverSocket.accept();
-                clientSocket.setSoTimeout(0);
 
+                // Reject connections immediately when capacity is exhausted.
                 if (!connectionPermits.tryAcquire()) {
                     rejectConnection(clientSocket);
                     continue;
@@ -89,6 +107,8 @@ public class BrokerServer {
                             () -> handleClient(clientSocket)
                     );
                 } catch (RuntimeException | Error e) {
+
+                    // Return the permit if the handler could not start.
                     connectionPermits.release();
 
                     try {
@@ -111,6 +131,9 @@ public class BrokerServer {
         }
     }
 
+    /**
+     * Rejects a client connection when the broker reaches its limit.
+     */
     private void rejectConnection(Socket clientSocket) {
 
         System.err.println(
@@ -127,6 +150,9 @@ public class BrokerServer {
         }
     }
 
+    /**
+     * Handles a client connection using a virtual thread.
+     */
     private void handleClient(Socket clientSocket) {
 
         try (clientSocket) {
@@ -145,8 +171,20 @@ public class BrokerServer {
                     "Client connection error: " + e.getMessage()
             );
         } finally {
+
+            // Release capacity after the client connection terminates.
             connectionPermits.release();
         }
+    }
+
+    /**
+     * Returns the actual bound port.
+     * Useful when the broker starts with port 0.
+     *
+     * @return local port, or -1 if the server socket is not initialized
+     */
+    int getLocalPort() {
+        return serverSocket == null ? -1 : serverSocket.getLocalPort();
     }
 
     public void stop() {
